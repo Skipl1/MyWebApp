@@ -2,33 +2,52 @@
 
 @{
     ViewData["Title"] = "Детали программы";
+    // 💡 ПРИМЕЧАНИЕ: Предполагается, что вы передаете булево значение из контроллера, 
+    // которое указывает, является ли текущий пользователь назначенным преподавателем.
+    // Если вы используете ASP.NET Identity, вы можете выполнить проверку напрямую здесь.
+    bool isAssignedTeacher = ViewBag.IsAssignedTeacher ?? false; // Получаем флаг из ViewBag
+    bool isAdmin = User.IsInRole("Admin"); // Проверка на роль Admin
+    
+    // Определяем, должен ли пользователь видеть кнопку редактирования
+    bool canEdit = isAdmin || isAssignedTeacher;
 }
 
 <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 
 <div class="container create-program-container">
 
-    <a asp-action="Index" class="back-button">
-        <i class="fas fa-arrow-left mr-2"></i> Назад к списку
-    </a>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <a asp-action="Index" class="back-button">
+            <i class="fas fa-arrow-left mr-2"></i> Назад к списку
+        </a>
+    </div>
 
     <div class="main-card">
         <div style="text-align: center; margin-top: 20px;">
             <h2>Учебная программа — Детали</h2>
+            
+            <div class="d-flex justify-content-center align-items-center mb-4">
+                
                 <a asp-controller="AcademicProgram" 
-                    asp-action="Download" 
-                    asp-route-id="@Model.Id" 
-                    class="btn btn-primary">
+                   asp-action="Download" 
+                   asp-route-id="@Model.Id" 
+                   class="btn btn-primary mr-3">
                     ⬇️ Скачать PDF
                 </a>
-        </div>
 
-
+                @if (ViewBag.CanEdit)
+                {
+                    <a asp-controller="AcademicProgram" 
+                       asp-action="Edit" 
+                       asp-route-id="@Model.Id" 
+                       class="btn btn-warning"> <i class="fas fa-edit mr-2"></i> Редактировать
+                    </a>
+                }
+            </div>
+            </div>
 
         <div class="card-body-custom">
-
             <div class="row mb-4">
-
                 <div class="col-lg-8">
                     <div class="row">
                         <div class="col-md-8">
@@ -57,30 +76,24 @@
 
                 <div class="col-lg-4">
                     <div class="info-panel">
-
                         <div class="info-item">
                             <div class="info-label">Направление</div>
                             <input type="text" class="readonly-box" readonly value="@Model.Specialty?.Direction" />
                         </div>
-
                         <div class="info-item mt-3">
                             <div class="info-label">Срок обучения</div>
                             <input type="text" class="readonly-box" readonly value="@Model.Specialty?.Duration" />
                         </div>
-
                         <div class="info-item mt-3">
                             <div class="info-label">Компетенции</div>
                             <textarea class="readonly-box" readonly>@Model.Competencies</textarea>
                         </div>
-
                     </div>
                 </div>
-
             </div>
 
             <hr />
 
-            <!-- ПРЕПОДАВАТЕЛИ -->
             <h5 class="mt-4 mb-3" style="color: #333;">Преподавательский состав</h5>
 
             <table class="table table-bordered table-sm">
@@ -90,35 +103,29 @@
                         <th>Тип участия</th>
                     </tr>
                 </thead>
-
                 <tbody>
                     @foreach (var dt in Model.Discipline.DisciplineTeachers)
                     {
                         <tr>
                             <td>@dt.Teacher.Surname @dt.Teacher.Name @dt.Teacher.Patronymic</td>
-                            <td>@dt.ParticipationType</td>
+                            <td><span class="badge badge-light border p-2">@dt.ParticipationType</span></td>
                         </tr>
                     }
                 </tbody>
             </table>
 
             <hr class="my-5" />
-
-            <!-- УЧЕБНЫЕ СЕМЕСТРЫ -->
             <h4 style="color: var(--primary-color);">Учебный план по семестрам</h4>
 
             <div id="semestersContainer">
-
                 @foreach (var wl in Model.WorkLoads.OrderBy(w => w.Semester))
                 {
                     <div class="semester-card mb-4">
-
                         <div class="semester-header-custom">
                             <h5 class="text-primary font-weight-bold mb-0">
                                 Семестр @wl.Semester
                             </h5>
                         </div>
-
                         <div class="workload-grid mt-3">
                             <div class="workload-item">
                                 <label>Лекции</label>
@@ -142,10 +149,8 @@
                             </div>
                         </div>
 
-                        <!-- Разделы -->
                         <div class="sections-wrapper mt-4">
                             <h6 class="text-secondary">Разделы дисциплины:</h6>
-
                             <table class="table table-bordered table-sm table-custom">
                                 <thead>
                                     <tr>
@@ -158,7 +163,6 @@
                                         <th>СРС</th>
                                     </tr>
                                 </thead>
-
                                 <tbody>
                                     @foreach (var s in wl.Sections.OrderBy(s => s.Index))
                                     {
@@ -175,15 +179,12 @@
                                 </tbody>
                             </table>
                         </div>
-
                     </div>
                 }
-
             </div>
 
             <hr class="my-5" />
 
-            <!-- Методические материалы -->
             <h4 style="color: var(--primary-color); margin-bottom: 20px;">Методические материалы</h4>
 
             <div class="row">

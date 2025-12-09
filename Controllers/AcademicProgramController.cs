@@ -6,7 +6,7 @@ using MyWebApp.Models;
 using Microsoft.AspNetCore.Authorization;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
-
+using System.Security.Claims;
 
 
 namespace MyWebApp.Controllers
@@ -35,8 +35,10 @@ namespace MyWebApp.Controllers
 
         // --- 2. ПРОСМОТР ДЕТАЛЕЙ (DETAILS) ---
         // --- 2. ПРОСМОТР ДЕТАЛЕЙ (DETAILS) ---
-        public async Task<IActionResult> Details(int id)
+        public async Task<IActionResult> Details(int? id)
         {
+            if (id == null) return NotFound();
+
             var program = await _context.AcademicPrograms
                 .Include(ap => ap.Specialty)
                 .Include(ap => ap.Discipline)
@@ -48,6 +50,29 @@ namespace MyWebApp.Controllers
 
             if (program == null)
                 return NotFound();
+
+            // 1. Проверка роли Администратора
+            bool isAdmin = User.IsInRole("admin");
+
+            // 2. Проверка, является ли пользователь назначенным преподавателем
+            bool isAssignedTeacher = false;
+            
+            // Получаем строковый ID текущего пользователя
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            // ⭐️ ИСПРАВЛЕНИЕ ОШИБКИ: Пытаемся преобразовать строковый ID в int.
+            if (!string.IsNullOrEmpty(currentUserId) && program.Discipline != null)
+            {
+                if (int.TryParse(currentUserId, out int userIdInt))
+                {
+                    isAssignedTeacher = program.Discipline.DisciplineTeachers
+                        // Сравнение int == int
+                        .Any(dt => dt.TeacherId == userIdInt); 
+                }
+            }
+
+            // 3. Передаем флаг для условного отображения кнопки "Редактировать" в представлении
+            ViewBag.CanEdit = isAdmin || isAssignedTeacher;
 
             return View(program);
         }
@@ -132,33 +157,48 @@ namespace MyWebApp.Controllers
             {
                 try
                 {
-                    // ⭐️ КЛЮЧЕВОЙ ШАГ: Обработка добавления/удаления/изменения WorkLoads и Sections
+                    // 1. Обработка вложенных коллекций (вероятно, здесь происходит загрузка сущности в память)
                     await UpdateNestedCollections(program);
                     
-                    // Поиск специальности для заполнения компетенций
+                    // 2. Поиск специальности для заполнения компетенций
                     var specialty = await _context.Specialties.FirstOrDefaultAsync(s => s.Id == program.SpecialtyId);
                     if (specialty != null)
                     {
-                        // Если поле компетенций в форме было пустым, берем значение из Specialty
                         if (string.IsNullOrEmpty(program.Competencies)) 
                         {
                             program.Competencies = specialty.Qualification;
                         }
                     }
                     
-                    _context.Update(program);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!AcademicProgramExists(program.Id))
+                    // --- ИСПРАВЛЕНИЕ НАЧАЛО ---
+                    
+                    // Ищем, есть ли этот AcademicProgram уже в памяти (в ChangeTracker)
+                    var trackedProgram = _context.ChangeTracker.Entries<AcademicProgram>()
+                        .FirstOrDefault(e => e.Entity.Id == program.Id)?.Entity;
+
+                    if (trackedProgram != null)
                     {
-                        return NotFound();
+                        // Если сущность уже отслеживается (загружена в UpdateNestedCollections),
+                        // мы просто копируем в неё новые простые значения (Name, Status и т.д.) из формы.
+                        // Коллекции (WorkLoads) не затронутся, так как SetValues их игнорирует (это правильно).
+                        _context.Entry(trackedProgram).CurrentValues.SetValues(program);
                     }
                     else
                     {
-                        throw;
+                        // Если в памяти объекта нет (маловероятно при вашей ошибке, но для страховки),
+                        // тогда обновляем целиком
+                        _context.Update(program);
                     }
+                    
+                    // --- ИСПРАВЛЕНИЕ КОНЕЦ ---
+
+                    await _context.SaveChangesAsync();
+                }
+                catch (Exception ex) // Перехватываем исключение
+                {
+                    // Здесь код обработки ошибки, например, логирование
+                    // или возврат ошибки пользователю
+                    ModelState.AddModelError("", "Ошибка при сохранении данных: " + ex.Message);
                 }
                 return RedirectToAction(nameof(Index));
             }
