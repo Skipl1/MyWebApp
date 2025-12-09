@@ -1,0 +1,214 @@
+@model MyWebApp.Models.AcademicProgram
+
+@{
+    ViewData["Title"] = "Детали программы";
+}
+
+<link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+<div class="container create-program-container">
+
+    <a asp-action="Index" class="back-button">
+        <i class="fas fa-arrow-left mr-2"></i> Назад к списку
+    </a>
+
+    <div class="main-card">
+        <div style="text-align: center; margin-top: 20px;">
+            <h2>Учебная программа — Детали</h2>
+                <a asp-controller="AcademicProgram" 
+                    asp-action="Download" 
+                    asp-route-id="@Model.Id" 
+                    class="btn btn-primary">
+                    ⬇️ Скачать PDF
+                </a>
+        </div>
+
+
+
+        <div class="card-body-custom">
+
+            <div class="row mb-4">
+
+                <div class="col-lg-8">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <label class="font-weight-bold">Название программы</label>
+                            <div class="readonly-box">@Model.Name</div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="font-weight-bold">Дисциплина</label>
+                            <div class="readonly-box">@Model.Discipline?.Name</div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-2">
+                        <div class="col-md-8">
+                            <label class="font-weight-bold">Специальность</label>
+                            <div class="readonly-box">@Model.Specialty?.Name</div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="font-weight-bold">Год начала</label>
+                            <div class="readonly-box">@Model.StartYear</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="info-panel">
+
+                        <div class="info-item">
+                            <div class="info-label">Направление</div>
+                            <input type="text" class="readonly-box" readonly value="@Model.Specialty?.Direction" />
+                        </div>
+
+                        <div class="info-item mt-3">
+                            <div class="info-label">Срок обучения</div>
+                            <input type="text" class="readonly-box" readonly value="@Model.Specialty?.Duration" />
+                        </div>
+
+                        <div class="info-item mt-3">
+                            <div class="info-label">Компетенции</div>
+                            <textarea class="readonly-box" readonly>@Model.Competencies</textarea>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <hr />
+
+            <!-- ПРЕПОДАВАТЕЛИ -->
+            <h5 class="mt-4 mb-3" style="color: #333;">Преподавательский состав</h5>
+
+            <table class="table table-bordered table-sm">
+                <thead style="background: #f8f9fa;">
+                    <tr>
+                        <th>Преподаватель</th>
+                        <th>Тип участия</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var dt in Model.Discipline.DisciplineTeachers)
+                    {
+                        <tr>
+                            <td>@dt.Teacher.Surname @dt.Teacher.Name @dt.Teacher.Patronymic</td>
+                            <td>@dt.ParticipationType</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <hr class="my-5" />
+
+            <!-- УЧЕБНЫЕ СЕМЕСТРЫ -->
+            <h4 style="color: var(--primary-color);">Учебный план по семестрам</h4>
+
+            <div id="semestersContainer">
+
+                @foreach (var wl in Model.WorkLoads.OrderBy(w => w.Semester))
+                {
+                    <div class="semester-card mb-4">
+
+                        <div class="semester-header-custom">
+                            <h5 class="text-primary font-weight-bold mb-0">
+                                Семестр @wl.Semester
+                            </h5>
+                        </div>
+
+                        <div class="workload-grid mt-3">
+                            <div class="workload-item">
+                                <label>Лекции</label>
+                                <div class="readonly-box">@wl.Lectures</div>
+                            </div>
+                            <div class="workload-item">
+                                <label>Лаб.</label>
+                                <div class="readonly-box">@wl.Labs</div>
+                            </div>
+                            <div class="workload-item">
+                                <label>Практ.</label>
+                                <div class="readonly-box">@wl.SelfStudy</div>
+                            </div>
+                            <div class="workload-item">
+                                <label>СРС</label>
+                                <div class="readonly-box">@wl.IntermediateAssessment</div>
+                            </div>
+                            <div class="workload-item">
+                                <label>Аттестация</label>
+                                <div class="readonly-box">@wl.AssessmentType</div>
+                            </div>
+                        </div>
+
+                        <!-- Разделы -->
+                        <div class="sections-wrapper mt-4">
+                            <h6 class="text-secondary">Разделы дисциплины:</h6>
+
+                            <table class="table table-bordered table-sm table-custom">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 50px;">#</th>
+                                        <th style="width: 30%;">Название раздела</th>
+                                        <th style="width: 40%;">Краткое содержание</th>
+                                        <th>Лек.</th>
+                                        <th>Лаб.</th>
+                                        <th>Сем.</th>
+                                        <th>СРС</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    @foreach (var s in wl.Sections.OrderBy(s => s.Index))
+                                    {
+                                        <tr>
+                                            <td>@s.Index</td>
+                                            <td>@s.Name</td>
+                                            <td>@s.Description</td>
+                                            <td>@s.LectureHours</td>
+                                            <td>@s.LabHours</td>
+                                            <td>@s.SeminarHours</td>
+                                            <td>@s.SelfStudyHours</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                }
+
+            </div>
+
+            <hr class="my-5" />
+
+            <!-- Методические материалы -->
+            <h4 style="color: var(--primary-color); margin-bottom: 20px;">Методические материалы</h4>
+
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <label class="methodical-label">Цели и задачи</label>
+                    <div class="readonly-box" style="white-space:pre-line;">@Model.Goals</div>
+                </div>
+
+                <div class="col-md-6 mb-4">
+                    <label class="methodical-label">Требования</label>
+                    <div class="readonly-box" style="white-space:pre-line;">@Model.Requirements</div>
+                </div>
+
+                <div class="col-md-6 mb-4">
+                    <label class="methodical-label">Место дисциплины</label>
+                    <div class="readonly-box" style="white-space:pre-line;">@Model.DisciplinePosition</div>
+                </div>
+
+                <div class="col-md-6 mb-4">
+                    <label class="methodical-label">Литература</label>
+                    <div class="readonly-box" style="white-space:pre-line;">@Model.Literature</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>

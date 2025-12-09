@@ -4,9 +4,10 @@ using Microsoft.EntityFrameworkCore;
 using MyWebApp.Data;
 using MyWebApp.Models;
 using Microsoft.AspNetCore.Authorization;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Collections.Generic;
+using iTextSharp.text;
+using iTextSharp.text.pdf;
+
+
 
 namespace MyWebApp.Controllers
 {
@@ -32,19 +33,146 @@ namespace MyWebApp.Controllers
             return View(programs);
         }
 
-        // --- 2. СОЗДАНИЕ (CREATE GET) ---
+        // --- 2. ПРОСМОТР ДЕТАЛЕЙ (DETAILS) ---
+        // --- 2. ПРОСМОТР ДЕТАЛЕЙ (DETAILS) ---
+        public async Task<IActionResult> Details(int id)
+        {
+            var program = await _context.AcademicPrograms
+                .Include(ap => ap.Specialty)
+                .Include(ap => ap.Discipline)
+                    .ThenInclude(d => d.DisciplineTeachers)
+                        .ThenInclude(dt => dt.Teacher)
+                .Include(ap => ap.WorkLoads)
+                    .ThenInclude(wl => wl.Sections)
+                .FirstOrDefaultAsync(ap => ap.Id == id);
+
+            if (program == null)
+                return NotFound();
+
+            return View(program);
+        }
+
+
+        // --- 3. СОЗДАНИЕ (CREATE GET & POST) ---
+
         [Authorize(Roles = "admin")]
         public async Task<IActionResult> Create()
         {
-            ViewBag.Specialties = new SelectList(
-                await _context.Specialties.OrderBy(s => s.Name).ToListAsync(), "Id", "Name");
-            ViewBag.Disciplines = new SelectList(
-                await _context.Disciplines.OrderBy(d => d.Name).ToListAsync(), "Id", "Name");
-
+            await PopulateDropDowns();
             return View(new AcademicProgram());
         }
 
-        // --- 3. AJAX ХЕЛПЕР (Для Specialty Details) ---
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "admin")]
+        public async Task<IActionResult> Create(
+            [Bind("Name,SpecialtyId,DisciplineId,StartYear,Goals,Requirements,DisciplinePosition,Literature,Status,WorkLoads")] AcademicProgram program)
+        {
+            ApplyDefaultStatusAndClearModelErrors(program);
+            
+            if (ModelState.IsValid)
+            {
+                var specialty = await _context.Specialties.FirstOrDefaultAsync(s => s.Id == program.SpecialtyId);
+
+                if (specialty == null)
+                {
+                    ModelState.AddModelError("SpecialtyId", "Специальность не найдена.");
+                }
+                else
+                {
+                    if (string.IsNullOrEmpty(program.Competencies)) 
+                    {
+                        program.Competencies = specialty.Qualification;
+                    }
+                    
+                    _context.Add(program);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
+            }
+            
+            await PopulateDropDowns(program.SpecialtyId, program.DisciplineId);
+            return View(program);
+        }
+
+
+        // ---------------------------------------------------------------------------------
+        // --- 4. РЕДАКТИРОВАНИЕ (EDIT GET & POST) 🚀 ---
+        // ---------------------------------------------------------------------------------
+        
+        [Authorize(Roles = "admin")]
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null) return NotFound();
+
+            // Загружаем программу вместе с вложенными коллекциями для отображения
+            var program = await _context.AcademicPrograms
+                .Include(ap => ap.WorkLoads)
+                    .ThenInclude(wl => wl.Sections)
+                .FirstOrDefaultAsync(ap => ap.Id == id);
+
+            if (program == null) return NotFound();
+
+            await PopulateDropDowns(program.SpecialtyId, program.DisciplineId);
+
+            return View(program);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "admin")]
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,SpecialtyId,DisciplineId,StartYear,Goals,Requirements,DisciplinePosition,Literature,Status,WorkLoads,Competencies")] AcademicProgram program)
+        {
+            if (id != program.Id) return NotFound();
+
+            // Применяем статус по умолчанию и очищаем ошибки валидации
+            ApplyDefaultStatusAndClearModelErrors(program);
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    // ⭐️ КЛЮЧЕВОЙ ШАГ: Обработка добавления/удаления/изменения WorkLoads и Sections
+                    await UpdateNestedCollections(program);
+                    
+                    // Поиск специальности для заполнения компетенций
+                    var specialty = await _context.Specialties.FirstOrDefaultAsync(s => s.Id == program.SpecialtyId);
+                    if (specialty != null)
+                    {
+                        // Если поле компетенций в форме было пустым, берем значение из Specialty
+                        if (string.IsNullOrEmpty(program.Competencies)) 
+                        {
+                            program.Competencies = specialty.Qualification;
+                        }
+                    }
+                    
+                    _context.Update(program);
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!AcademicProgramExists(program.Id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                return RedirectToAction(nameof(Index));
+            }
+
+            // Если есть ошибки, перезагружаем списки
+            await PopulateDropDowns(program.SpecialtyId, program.DisciplineId);
+            return View(program);
+        }
+
+
+        // ---------------------------------------------------------------------------------
+        // --- AJAX ХЕЛПЕРЫ ---
+        // ---------------------------------------------------------------------------------
+
         [HttpGet]
         public async Task<IActionResult> GetSpecialtyDetails(int specialtyId)
         {
@@ -58,11 +186,10 @@ namespace MyWebApp.Controllers
             {
                 direction = specialty.Direction,
                 duration = specialty.Duration,
-                competencies = specialty.Qualification ?? "Компетенции не указаны в Specialty",
+                competencies = specialty.Qualification ?? "", // Пустая строка вместо заглушки
             });
         }
 
-        // --- 3b. AJAX ХЕЛПЕР (Для загрузки преподавателей по Дисциплине) ---
         [HttpGet]
         public async Task<IActionResult> GetDisciplineTeachers(int disciplineId)
         {
@@ -94,122 +221,379 @@ namespace MyWebApp.Controllers
             });
         }
 
-        // --- 4. СОЗДАНИЕ (CREATE POST) ---
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        [Authorize(Roles = "admin")]
-        public async Task<IActionResult> Create(
-            [Bind("Name,SpecialtyId,DisciplineId,StartYear,Goals,Requirements,DisciplinePosition,Literature,Status,WorkLoads")] AcademicProgram program)
+
+        // ---------------------------------------------------------------------------------
+        // --- ПРИВАТНЫЕ ХЕЛПЕРЫ EF CORE ---
+        // ---------------------------------------------------------------------------------
+
+        // Заполнение ViewBag для выпадающих списков
+        private async Task PopulateDropDowns(int? specialtyId = null, int? disciplineId = null)
         {
-            // 1. Установка значения по умолчанию
+            ViewBag.Specialties = new SelectList(
+                await _context.Specialties.OrderBy(s => s.Name).ToListAsync(), "Id", "Name", specialtyId);
+            ViewBag.Disciplines = new SelectList(
+                await _context.Disciplines.OrderBy(d => d.Name).ToListAsync(), "Id", "Name", disciplineId);
+        }
+        
+        // Проверка существования программы
+        private bool AcademicProgramExists(int id)
+        {
+            return _context.AcademicPrograms.Any(e => e.Id == id);
+        }
+
+        // Логика очистки ModelState и установки статуса по умолчанию (общая для Create и Edit POST)
+        private void ApplyDefaultStatusAndClearModelErrors(AcademicProgram program)
+        {
             if (string.IsNullOrEmpty(program.Status)) program.Status = "draft";
 
-            // 2. Очистка валидации для основных навигационных свойств
+            // Очистка валидации для основных навигационных свойств, которые не биндятся
             ModelState.Remove("Specialty");
             ModelState.Remove("Discipline");
-            ModelState.Remove("Competencies"); // Заполняется программно ниже
-
-            // 3. Обработка списка WorkLoads (Вложенные коллекции)
+            ModelState.Remove("Competencies"); // Если не было в bind
+            
+            // Логика для WorkLoads/Sections (убираем ошибки циклических ссылок)
             if (program.WorkLoads == null || !program.WorkLoads.Any())
             {
-                // ИСПРАВЛЕНИЕ: "The WorkLoad field is required"
-                // Если список пуст, просто удаляем ошибку требования списка
                 ModelState.Remove("WorkLoads");
             }
             else
             {
-                // Если список есть, нужно очистить циклические ссылки (Parent references)
                 for (int i = 0; i < program.WorkLoads.Count; i++)
                 {
-                    // WorkLoad -> AcademicProgram
                     ModelState.Remove($"WorkLoads[{i}].AcademicProgram");
-
                     var workload = program.WorkLoads.ElementAt(i);
                     if (workload.Sections != null)
                     {
                         for (int j = 0; j < workload.Sections.Count; j++)
                         {
-                            // Section -> WorkLoad
                             ModelState.Remove($"WorkLoads[{i}].Sections[{j}].WorkLoad");
                         }
                     }
                 }
             }
 
-            // =================================================================================
-            // 4. ГЛОБАЛЬНОЕ ИСПРАВЛЕНИЕ ОШИБКИ: "The value '' is invalid"
-            // =================================================================================
-            // Мы проходим по всем ошибкам валидации. Если ошибка говорит о неверном значении (''),
-            // и при этом пришло пустое значение или null, мы принудительно удаляем эту ошибку.
-            // Это позволяет int полям оставаться 0 или null без блокировки сохранения.
-            
-            var keysWithErrors = ModelState.Keys
-                .Where(k => ModelState[k].Errors.Count > 0)
-                .ToList();
+            // ГЛОБАЛЬНОЕ ИСПРАВЛЕНИЕ ОШИБКИ: "The value '' is invalid" для числовых полей
+            var keysWithErrors = ModelState.Keys.Where(k => ModelState[k].Errors.Count > 0).ToList();
 
             foreach (var key in keysWithErrors)
             {
                 var errors = ModelState[key].Errors;
-                
-                // Ищем ошибки конвертации типов (пустая строка в число)
                 var invalidValueErrors = errors
-                    .Where(e => e.ErrorMessage.Contains("is invalid") || 
-                                e.ErrorMessage.Contains("недействительно") ||
-                                e.ErrorMessage.Contains("The value ''"))
+                    .Where(e => e.ErrorMessage.Contains("is invalid") || e.ErrorMessage.Contains("недействительно") || e.ErrorMessage.Contains("The value ''"))
                     .ToList();
 
                 if (invalidValueErrors.Any())
                 {
-                    // Получаем значение, которое вызвало ошибку
                     var attempt = ModelState[key].AttemptedValue;
-
-                    // Если пытались передать пустоту, и это вызвало ошибку -> удаляем её
                     if (string.IsNullOrEmpty(attempt))
                     {
                         ModelState.Remove(key);
                     }
                 }
             }
-            // =================================================================================
+        }
+        
+        // Метод для обновления вложенных коллекций (WorkLoads и Sections) при редактировании
+        private async Task UpdateNestedCollections(AcademicProgram program)
+        {
+            // 1. Загрузка существующей программы из БД с отслеживанием
+            var existingProgram = await _context.AcademicPrograms
+                .Include(ap => ap.WorkLoads)
+                    .ThenInclude(wl => wl.Sections)
+                .AsNoTracking() // Важно: AsNoTracking, чтобы не было конфликта при Update(program)
+                .FirstOrDefaultAsync(ap => ap.Id == program.Id);
 
-            if (ModelState.IsValid)
-            {
-                // Поиск специальности для заполнения компетенций
-                var specialty = await _context.Specialties.FirstOrDefaultAsync(s => s.Id == program.SpecialtyId);
-
-                if (specialty == null)
-                {
-                    ModelState.AddModelError("SpecialtyId", "Специальность не найдена.");
-                }
-                else
-                {
-                    // Если компетенции не введены вручную, берем из специальности
-                    if (string.IsNullOrEmpty(program.Competencies)) 
-                    {
-                        program.Competencies = specialty.Qualification;
-                    }
-                    
-                    _context.Add(program);
-                    await _context.SaveChangesAsync();
-                    return RedirectToAction(nameof(Index));
-                }
-            }
-
-            // Если все же есть ошибки, перезагружаем списки для выпадающих меню
-            ViewBag.Specialties = new SelectList(await _context.Specialties.OrderBy(s => s.Name).ToListAsync(), "Id", "Name", program.SpecialtyId);
-            ViewBag.Disciplines = new SelectList(await _context.Disciplines.OrderBy(d => d.Name).ToListAsync(), "Id", "Name", program.DisciplineId);
+            if (existingProgram == null) return;
             
-            // Логирование ошибок для отладки (опционально, можно смотреть в Output при отладке)
-            foreach (var modelStateKey in ModelState.Keys)
+            // 2. УДАЛЕНИЕ: Находим WorkLoads, которые были удалены в форме, и удаляем их
+            var incomingWorkLoadIds = program.WorkLoads?.Where(wl => wl.Id != 0).Select(wl => wl.Id).ToList() ?? new List<int>();
+            
+            var workLoadsToDelete = existingProgram.WorkLoads
+                .Where(wl => !incomingWorkLoadIds.Contains(wl.Id))
+                .ToList();
+
+            foreach (var workLoad in workLoadsToDelete)
             {
-                var value = ModelState[modelStateKey];
-                foreach (var error in value.Errors)
+                // Удаляем секции и WorkLoad
+                _context.Sections.RemoveRange(workLoad.Sections);
+                _context.WorkLoads.Remove(workLoad);
+            }
+            
+            // 3. ДОБАВЛЕНИЕ/ОБНОВЛЕНИЕ: Проходим по входящей коллекции
+            if (program.WorkLoads != null)
+            {
+                foreach (var incomingWorkLoad in program.WorkLoads)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Key: {modelStateKey}, Error: {error.ErrorMessage}");
+                    if (incomingWorkLoad.Id == 0)
+                    {
+                        // Новый WorkLoad: добавить
+                        incomingWorkLoad.AcademicProgramId = program.Id;
+                        _context.WorkLoads.Add(incomingWorkLoad);
+                    }
+                    else
+                    {
+                        // Существующий WorkLoad: обновить
+                        _context.WorkLoads.Update(incomingWorkLoad);
+                        
+                        // Обработка вложенных Sections для этого WorkLoad
+                        var existingWorkLoad = existingProgram.WorkLoads.FirstOrDefault(wl => wl.Id == incomingWorkLoad.Id);
+                        if (existingWorkLoad != null)
+                        {
+                            var incomingSectionIds = incomingWorkLoad.Sections?.Where(s => s.Id != 0).Select(s => s.Id).ToList() ?? new List<int>();
+
+                            // Удаление Sections
+                            var sectionsToDelete = existingWorkLoad.Sections
+                                .Where(s => !incomingSectionIds.Contains(s.Id))
+                                .ToList();
+                            _context.Sections.RemoveRange(sectionsToDelete);
+
+                            // Обновление/добавление Sections
+                            if (incomingWorkLoad.Sections != null)
+                            {
+                                foreach (var incomingSection in incomingWorkLoad.Sections)
+                                {
+                                    if (incomingSection.Id == 0)
+                                    {
+                                        incomingSection.WorkLoadId = incomingWorkLoad.Id;
+                                        _context.Sections.Add(incomingSection);
+                                    }
+                                    else
+                                    {
+                                        _context.Sections.Update(incomingSection);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+             
+            // Сохраняем изменения вложенных коллекций (удаления/добавления/изменения)
+            await _context.SaveChangesAsync();
+            
+            // Обнуляем коллекцию во входящей модели, чтобы избежать конфликта при финальном Update(program)
+            program.WorkLoads = null;
+        }
+
+        // --- Добавьте этот метод в AcademicProgramController ---
+
+        public async Task<IActionResult> Download(int id)
+        {
+            // 1. ПОЛНАЯ ЗАГРУЗКА ВСЕХ ДАННЫХ
+            var program = await _context.AcademicPrograms
+                .Include(ap => ap.Specialty)
+                .Include(ap => ap.Discipline)
+                    .ThenInclude(d => d.DisciplineTeachers)
+                        .ThenInclude(dt => dt.Teacher)
+                .Include(ap => ap.WorkLoads)
+                    .ThenInclude(wl => wl.Sections)
+                .FirstOrDefaultAsync(ap => ap.Id == id);
+
+            if (program == null) return NotFound();
+
+            using var ms = new MemoryStream();
+            
+            // Создаем документ
+            Document doc = new Document(PageSize.A4, 30, 30, 30, 30);
+            PdfWriter writer = PdfWriter.GetInstance(doc, ms);
+
+            doc.Open();
+
+            // 2. НАСТРОЙКА ШРИФТОВ (Обязательно для русского языка)
+            string fontPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Fonts), "arial.ttf");
+            if (!System.IO.File.Exists(fontPath))
+            {
+                fontPath = @"C:\Windows\Fonts\arial.ttf"; 
+            }
+            
+            BaseFont baseFont = BaseFont.CreateFont(fontPath, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+            
+            // Стили шрифтов - только размер и жирность (черный цвет по умолчанию)
+            Font fontTitle = new Font(baseFont, 16, Font.BOLD);
+            Font fontSectionHeader = new Font(baseFont, 14, Font.BOLD); 
+            Font fontBold = new Font(baseFont, 10, Font.BOLD);
+            Font fontNormal = new Font(baseFont, 10, Font.NORMAL);
+            Font fontSmall = new Font(baseFont, 9, Font.NORMAL);
+
+            // --- ЗАГОЛОВОК ---
+            var titleParagraph = new Paragraph($"Учебная программа: {program.Name}", fontTitle);
+            titleParagraph.Alignment = Element.ALIGN_CENTER;
+            titleParagraph.SpacingAfter = 20f;
+            doc.Add(titleParagraph);
+
+            // --- БЛОК 1: ОСНОВНАЯ ИНФОРМАЦИЯ (Простая таблица) ---
+            PdfPTable mainInfoTable = new PdfPTable(4); // Увеличим до 4 столбцов: 2 для левой части, 2 для правой
+            mainInfoTable.WidthPercentage = 100;
+            mainInfoTable.SetWidths(new float[] { 20, 30, 20, 30 });
+            mainInfoTable.SpacingAfter = 20f;
+            
+            // Строка 1
+            AddSimpleCell(mainInfoTable, "Название программы", fontBold, 1);
+            AddSimpleCell(mainInfoTable, program.Name, fontNormal, 1);
+            AddSimpleCell(mainInfoTable, "Направление", fontBold, 1);
+            AddSimpleCell(mainInfoTable, program.Specialty?.Direction, fontNormal, 1);
+
+            // Строка 2
+            AddSimpleCell(mainInfoTable, "Дисциплина", fontBold, 1);
+            AddSimpleCell(mainInfoTable, program.Discipline?.Name, fontNormal, 1);
+            AddSimpleCell(mainInfoTable, "Срок обучения", fontBold, 1);
+            // *** ИСПРАВЛЕННАЯ СТРОКА ***
+            AddSimpleCell(mainInfoTable, program.Specialty?.Duration.ToString(), fontNormal, 1);
+
+            // Строка 3
+            AddSimpleCell(mainInfoTable, "Специальность", fontBold, 1);
+            AddSimpleCell(mainInfoTable, program.Specialty?.Name, fontNormal, 1);
+            AddSimpleCell(mainInfoTable, "Компетенции", fontBold, 1);
+            AddSimpleCell(mainInfoTable, program.Competencies, fontNormal, 1);
+
+            // Строка 4
+            AddSimpleCell(mainInfoTable, "Год начала", fontBold, 1);
+            AddSimpleCell(mainInfoTable, program.StartYear.ToString(), fontNormal, 1);
+            // Заполняем пустые ячейки (span 2 колонки)
+            AddSimpleCell(mainInfoTable, "", fontNormal, 2); 
+
+            doc.Add(mainInfoTable);
+
+            // --- БЛОК 2: ПРЕПОДАВАТЕЛИ ---
+            doc.Add(new Paragraph("Преподавательский состав", fontSectionHeader) { SpacingBefore = 10f, SpacingAfter = 10f });
+
+            if (program.Discipline?.DisciplineTeachers != null && program.Discipline.DisciplineTeachers.Any())
+            {
+                PdfPTable teachersTable = new PdfPTable(2);
+                teachersTable.WidthPercentage = 100;
+                teachersTable.SetWidths(new float[] { 70, 30 });
+                teachersTable.DefaultCell.BorderColor = BaseColor.BLACK;
+
+                // Хедер таблицы
+                AddSimpleHeaderCell(teachersTable, "Преподаватель", fontBold);
+                AddSimpleHeaderCell(teachersTable, "Тип участия", fontBold);
+
+                foreach (var dt in program.Discipline.DisciplineTeachers)
+                {
+                    teachersTable.AddCell(new Phrase($"{dt.Teacher.Surname} {dt.Teacher.Name} {dt.Teacher.Patronymic}", fontNormal));
+                    teachersTable.AddCell(new Phrase(dt.ParticipationType, fontNormal));
+                }
+                doc.Add(teachersTable);
+            }
+            else
+            {
+                doc.Add(new Paragraph("Преподаватели не назначены.", fontNormal));
+            }
+
+            // --- БЛОК 3: УЧЕБНЫЙ ПЛАН ПО СЕМЕСТРАМ ---
+            doc.Add(new Paragraph("Учебный план по семестрам", fontSectionHeader) { SpacingBefore = 20f, SpacingAfter = 10f });
+
+            if (program.WorkLoads != null && program.WorkLoads.Any())
+            {
+                foreach (var wl in program.WorkLoads.OrderBy(w => w.Semester))
+                {
+                    // Заголовок семестра
+                    doc.Add(new Paragraph($"СЕМЕСТР {wl.Semester}", fontBold) { SpacingBefore = 10f, SpacingAfter = 5f });
+                    
+                    // Сводка по часам (Лекции, Лабы и т.д.) - Одна строка
+                    PdfPTable statsTable = new PdfPTable(5);
+                    statsTable.WidthPercentage = 100;
+                    statsTable.DefaultCell.BorderColor = BaseColor.BLACK;
+                    
+                    AddSimpleHeaderCell(statsTable, "Лекции", fontBold);
+                    AddSimpleHeaderCell(statsTable, "Лаб.", fontBold);
+                    AddSimpleHeaderCell(statsTable, "Практ. (СРС)", fontBold);
+                    AddSimpleHeaderCell(statsTable, "Аттестация", fontBold);
+                    AddSimpleHeaderCell(statsTable, "Общая СРС", fontBold); // Используем IntermediateAssessment для СРС
+
+                    statsTable.AddCell(new Phrase(wl.Lectures.ToString(), fontNormal));
+                    statsTable.AddCell(new Phrase(wl.Labs.ToString(), fontNormal));
+                    statsTable.AddCell(new Phrase(wl.SelfStudy.ToString(), fontNormal));
+                    statsTable.AddCell(new Phrase(wl.IntermediateAssessment.ToString(), fontNormal));
+                    statsTable.AddCell(new Phrase(wl.AssessmentType, fontNormal));
+                    
+                    doc.Add(statsTable);
+
+                    // Таблица Разделов (Sections)
+                    doc.Add(new Paragraph("Разделы дисциплины:", fontBold) { SpacingBefore = 10f });
+                    
+                    if (wl.Sections != null && wl.Sections.Any())
+                    {
+                        PdfPTable secTable = new PdfPTable(7);
+                        secTable.WidthPercentage = 100;
+                        secTable.SetWidths(new float[] { 5, 20, 30, 10, 10, 10, 15 });
+                        secTable.SpacingBefore = 5f;
+                        secTable.DefaultCell.BorderColor = BaseColor.BLACK;
+
+                        AddSimpleHeaderCell(secTable, "#", fontBold);
+                        AddSimpleHeaderCell(secTable, "Название раздела", fontBold);
+                        AddSimpleHeaderCell(secTable, "Краткое содержание", fontBold);
+                        AddSimpleHeaderCell(secTable, "Лек.", fontBold);
+                        AddSimpleHeaderCell(secTable, "Лаб.", fontBold);
+                        AddSimpleHeaderCell(secTable, "Сем.", fontBold);
+                        AddSimpleHeaderCell(secTable, "СРС", fontBold);
+
+                        foreach (var s in wl.Sections.OrderBy(sec => sec.Index))
+                        {
+                            secTable.AddCell(new Phrase(s.Index.ToString(), fontSmall));
+                            secTable.AddCell(new Phrase(s.Name, fontSmall));
+                            secTable.AddCell(new Phrase(s.Description, fontSmall));
+                            secTable.AddCell(new PdfPCell(new Phrase(s.LectureHours.ToString(), fontSmall)) { HorizontalAlignment = Element.ALIGN_CENTER });
+                            secTable.AddCell(new PdfPCell(new Phrase(s.LabHours.ToString(), fontSmall)) { HorizontalAlignment = Element.ALIGN_CENTER });
+                            secTable.AddCell(new PdfPCell(new Phrase(s.SeminarHours.ToString(), fontSmall)) { HorizontalAlignment = Element.ALIGN_CENTER });
+                            secTable.AddCell(new PdfPCell(new Phrase(s.SelfStudyHours.ToString(), fontSmall)) { HorizontalAlignment = Element.ALIGN_CENTER });
+                        }
+                        doc.Add(secTable);
+                    }
+                    else
+                    {
+                        doc.Add(new Paragraph("Разделы отсутствуют", fontNormal));
+                    }
                 }
             }
 
-            return View(program);
+            // --- БЛОК 4: МЕТОДИЧЕСКИЕ МАТЕРИАЛЫ ---
+            doc.Add(new Paragraph("Методические материалы", fontSectionHeader) { SpacingBefore = 20f, SpacingAfter = 15f });
+
+            // Используем вспомогательный метод для простого вывода текста
+            AddSimpleTextBlock(doc, "Цели и задачи", program.Goals, fontBold, fontNormal);
+            AddSimpleTextBlock(doc, "Требования", program.Requirements, fontBold, fontNormal);
+            AddSimpleTextBlock(doc, "Место дисциплины", program.DisciplinePosition, fontBold, fontNormal);
+            AddSimpleTextBlock(doc, "Литература", program.Literature, fontBold, fontNormal);
+
+            doc.Close();
+
+            string fileName = $"Program_{program.Id}.pdf";
+            return File(ms.ToArray(), "application/pdf", fileName);
+        }
+
+        // --- ОБНОВЛЕННЫЕ ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ (Добавить внутри класса контроллера) ---
+
+        private void AddSimpleCell(PdfPTable table, string content, Font font, int colspan = 1)
+        {
+            var cell = new PdfPCell(new Phrase(content ?? "-", font));
+            cell.Colspan = colspan;
+            cell.Padding = 5f;
+            cell.BorderColor = BaseColor.BLACK;
+            cell.VerticalAlignment = Element.ALIGN_MIDDLE;
+            table.AddCell(cell);
+        }
+        
+        private void AddSimpleHeaderCell(PdfPTable table, string text, Font font)
+        {
+            var cell = new PdfPCell(new Phrase(text, font));
+            cell.BackgroundColor = BaseColor.LIGHT_GRAY; // Просто легкий серый для заголовка
+            cell.HorizontalAlignment = Element.ALIGN_CENTER;
+            cell.Padding = 5f;
+            cell.BorderColor = BaseColor.BLACK;
+            table.AddCell(cell);
+        }
+        
+        private void AddSimpleTextBlock(Document doc, string title, string content, Font fontTitle, Font fontBody)
+        {
+            if (!string.IsNullOrWhiteSpace(content))
+            {
+                doc.Add(new Paragraph(title, fontTitle) { SpacingBefore = 10f });
+                
+                var p = new Paragraph(content, fontBody);
+                p.SpacingAfter = 10f;
+                doc.Add(p);
+            }
         }
     }
 }

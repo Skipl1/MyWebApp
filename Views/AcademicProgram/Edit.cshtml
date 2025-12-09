@@ -1,7 +1,8 @@
 @model MyWebApp.Models.AcademicProgram
 
 @{
-    ViewData["Title"] = "Создание программы";
+    // 1. Изменен заголовок страницы
+    ViewData["Title"] = $"Редактирование программы: {Model.Name}";
 }
 
 <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
@@ -11,13 +12,15 @@
         <i class="fas fa-arrow-left mr-2"></i> К списку
     </a>
 
-    <form asp-action="Create" method="post" id="createForm">
+    <form asp-action="Edit" method="post" id="createForm">
         @Html.AntiForgeryToken()
-        <input type="hidden" asp-for="Status" value="draft" /> 
+        
+        <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="Status" /> 
         
         <div class="main-card">
             <div class="main-card-header">
-                <h2>Создание учебной программы</h2>
+                <h2>Редактирование учебной программы: @Model.Name</h2>
             </div>
 
             <div class="card-body-custom">
@@ -36,7 +39,7 @@
                                 <div class="form-group">
                                     <label asp-for="DisciplineId">Дисциплина *</label>
                                     <select asp-for="DisciplineId" class="form-control" id="disciplineSelect" asp-items="ViewBag.Disciplines">
-                                        <option value="" disabled selected>-- Выберите --</option>
+                                        <option value="" disabled>-- Выберите --</option>
                                     </select>
                                 </div>
                             </div>
@@ -47,14 +50,14 @@
                                 <div class="form-group">
                                     <label asp-for="SpecialtyId">Специальность *</label>
                                     <select asp-for="SpecialtyId" class="form-control" id="specialtySelect" asp-items="ViewBag.Specialties">
-                                        <option value="" disabled selected>-- Выберите --</option>
+                                        <option value="" disabled>-- Выберите --</option>
                                     </select>
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label asp-for="StartYear">Год начала *</label>
-                                    <input asp-for="StartYear" type="number" class="form-control" value="@DateTime.Now.Year" />
+                                    <input asp-for="StartYear" type="number" class="form-control" />
                                 </div>
                             </div>
                         </div>
@@ -92,7 +95,7 @@
                         </tr>
                     </thead>
                     <tbody id="teachersList">
-                        </tbody>
+                    </tbody>
                 </table>
 
                 <hr class="my-5"/>
@@ -102,7 +105,7 @@
                 </div>
 
                 <div id="semestersContainer">
-                    </div>
+                </div>
 
                 <button type="button" class="btn btn-add-sem" onclick="addSemesterBlock()">
                     <i class="fas fa-plus-circle"></i> ДОБАВИТЬ СЕМЕСТР
@@ -148,7 +151,7 @@
 
                 <div class="mt-4">
                     <button type="submit" class="btn btn-primary btn-lg btn-block" style="padding: 15px; font-weight: bold;">
-                        <i class="fas fa-save mr-2"></i> СОХРАНИТЬ ПРОГРАММУ
+                        <i class="fas fa-save mr-2"></i> СОХРАНИТЬ ИЗМЕНЕНИЯ
                     </button>
                 </div>
 
@@ -157,10 +160,21 @@
     </form>
 </div>
 
+---
+
+## 💻 JavaScript (Логика Редактирования)
+
+Основное изменение здесь:
+1.  Добавление функции **`addSectionRowWithData`** и **`addSemesterBlockWithData`** для загрузки данных из модели.
+2.  Добавление функции **`loadExistingData`** в `$(document).ready` для инициализации страницы данными.
+3.  Использование **Razor** для передачи существующих данных в JavaScript.
+
+```javascript
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 
     <script>
+        // Глобальный индекс для новых семестров/секций
         let semesterIndex = 0;
 
         // --- 1. Функция создания строки преподавателя ---
@@ -170,28 +184,58 @@
             return `
                 <tr>
                     <td>
-                        <input type="hidden" name="TeacherId" value="${teacherId}" />
+                        <input type="hidden" name="Teachers[${teacherId}].TeacherId" value="${teacherId}" />
                         <span class="font-weight-bold">${displayTeacherName}</span>
                     </td>
                     <td>
-                        <input type="hidden" name="ParticipationType" value="${participationType}" />
+                        <input type="hidden" name="Teachers[${teacherId}].ParticipationType" value="${participationType}" />
                         <span class="badge badge-light border p-2">${pType}</span>
                     </td>
                 </tr>
             `;
         }
 
-        // --- 2. Добавление блока семестра ---
-        function addSemesterBlock() {
-            const container = document.getElementById('semestersContainer');
-            const currentSemIndex = semesterIndex; 
+        // --- 2. Добавление строки раздела (с данными) ---
+        function addSectionRowWithData(parentIndex, sectionIndex, sectionData = {}) {
+            const tbody = document.querySelector(`.sections-body[data-parent-index="${parentIndex}"]`);
+            if (!tbody) return;
 
+            // Если data не передана, используем текущую длину как индекс (для НОВЫХ)
+            const actualSectionIndex = sectionData.Index !== undefined ? sectionData.Index : tbody.children.length;
+            
+            const row = document.createElement('tr');
+            
+            row.innerHTML = `
+                <td>
+                    <input type="text" name="WorkLoads[${parentIndex}].Sections[${actualSectionIndex}].Index" class="table-input text-center" value="${actualSectionIndex + 1}" readonly style="background:#f8f9fa;" />
+                </td>
+                <td>
+                    <input type="text" name="WorkLoads[${parentIndex}].Sections[${actualSectionIndex}].Name" class="table-input" placeholder="Название..." required value="${sectionData.Name || ''}" />
+                </td>
+                <td>
+                    <textarea name="WorkLoads[${parentIndex}].Sections[${actualSectionIndex}].Description" class="table-input" rows="1" placeholder="Краткое содержание..." style="resize:vertical;">${sectionData.Description || ''}</textarea>
+                </td>
+                <td><input type="number" name="WorkLoads[${parentIndex}].Sections[${actualSectionIndex}].LectureHours" class="table-input text-center" value="${sectionData.LectureHours || 0}" /></td>
+                <td><input type="number" name="WorkLoads[${parentIndex}].Sections[${actualSectionIndex}].LabHours" class="table-input text-center" value="${sectionData.LabHours || 0}" /></td>
+                <td><input type="number" name="WorkLoads[${parentIndex}].Sections[${actualSectionIndex}].SeminarHours" class="table-input text-center" value="${sectionData.SeminarHours || 0}" /></td>
+                <td><input type="number" name="WorkLoads[${parentIndex}].Sections[${actualSectionIndex}].SelfStudyHours" class="table-input text-center" value="${sectionData.SelfStudyHours || 0}" /></td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-sm text-danger" onclick="this.closest('tr').remove()" title="Удалить строку">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        }
+        
+        // --- 3. Добавление блока семестра (с данными) ---
+        function addSemesterBlockWithData(currentSemIndex, data = {}) {
+            const container = document.getElementById('semestersContainer');
+            
             const block = document.createElement('div');
             block.classList.add('semester-card');
             block.setAttribute('data-index', currentSemIndex);
 
-            // Обратите внимание на table-custom:
-            // Столбец "Название раздела" (width 30%) и "Краткое содержание" (width 30%) теперь разделены.
             block.innerHTML = `
                 <div class="semester-header-custom">
                     <div class="d-flex align-items-center">
@@ -200,7 +244,7 @@
                             <div class="input-group-prepend">
                                 <span class="input-group-text">№</span>
                             </div>
-                            <input type="number" name="WorkLoads[${currentSemIndex}].Semester" class="form-control font-weight-bold" required min="1" value="${currentSemIndex + 1}" />
+                            <input type="number" name="WorkLoads[${currentSemIndex}].Semester" class="form-control font-weight-bold" required min="1" value="${data.Semester || (currentSemIndex + 1)}" />
                         </div>
                     </div>
                     <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeSemester(this)">
@@ -211,27 +255,27 @@
                 <div class="workload-grid">
                     <div class="workload-item">
                         <label>Лекции (ч)</label>
-                        <input type="number" name="WorkLoads[${currentSemIndex}].Lectures" class="form-control" value="0" />
+                        <input type="number" name="WorkLoads[${currentSemIndex}].Lectures" class="form-control" value="${data.Lectures || 0}" />
                     </div>
                     <div class="workload-item">
                         <label>Лаб. (ч)</label>
-                        <input type="number" name="WorkLoads[${currentSemIndex}].Labs" class="form-control" value="0" />
+                        <input type="number" name="WorkLoads[${currentSemIndex}].Labs" class="form-control" value="${data.Labs || 0}" />
                     </div>
                     <div class="workload-item">
                         <label>Практ. (ч)</label>
-                        <input type="number" name="WorkLoads[${currentSemIndex}].Seminars" class="form-control" value="0" />
+                        <input type="number" name="WorkLoads[${currentSemIndex}].Seminars" class="form-control" value="${data.Seminars || 0}" />
                     </div>
                     <div class="workload-item">
                         <label>Сам. раб (ч)</label>
-                        <input type="number" name="WorkLoads[${currentSemIndex}].SelfStudy" class="form-control" value="0" />
+                        <input type="number" name="WorkLoads[${currentSemIndex}].SelfStudy" class="form-control" value="${data.SelfStudy || 0}" />
                     </div>
                     <div class="workload-item">
                         <label>Аттестация</label>
                         <select name="WorkLoads[${currentSemIndex}].AssessmentType" class="form-control">
                             <option value="">-- Выберите --</option>
-                            <option value="Экзамен">Экзамен</option>
-                            <option value="Зачет">Зачет</option>
-                            <option value="Курсовая">Курсовая</option>
+                            <option value="Экзамен" ${data.AssessmentType === 'Экзамен' ? 'selected' : ''}>Экзамен</option>
+                            <option value="Зачет" ${data.AssessmentType === 'Зачет' ? 'selected' : ''}>Зачет</option>
+                            <option value="Курсовая" ${data.AssessmentType === 'Курсовая' ? 'selected' : ''}>Курсовая</option>
                         </select>
                     </div>
                 </div>
@@ -251,47 +295,33 @@
                                 <th style="width: 40px;"></th>
                             </tr>
                         </thead>
-                        <tbody class="sections-body">
-                            </tbody>
+                        <tbody class="sections-body" data-parent-index="${currentSemIndex}">
+                        </tbody>
                     </table>
-                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addSectionRow(${currentSemIndex}, this)">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addSectionRowWithData(${currentSemIndex})">
                         <i class="fas fa-plus"></i> Добавить раздел
                     </button>
                 </div>
             `;
             
             container.appendChild(block);
-            semesterIndex++; 
-        }
-
-        // --- 3. Добавление строки раздела (Исправлено: Разные столбцы) ---
-        function addSectionRow(parentIndex, btn) {
-            const tbody = btn.previousElementSibling.querySelector('.sections-body');
-            const sectionIndex = tbody.children.length;
-            const row = document.createElement('tr');
+            semesterIndex++;
             
-            // Здесь "Название" и "Описание" находятся в разных TD
-            row.innerHTML = `
-                <td>
-                    <input type="text" name="WorkLoads[${parentIndex}].Sections[${sectionIndex}].Index" class="table-input text-center" value="${sectionIndex + 1}" readonly style="background:#f8f9fa;" />
-                </td>
-                <td>
-                    <input type="text" name="WorkLoads[${parentIndex}].Sections[${sectionIndex}].Name" class="table-input" placeholder="Название..." required />
-                </td>
-                <td>
-                    <textarea name="WorkLoads[${parentIndex}].Sections[${sectionIndex}].Description" class="table-input" rows="1" placeholder="Краткое содержание..." style="resize:vertical;"></textarea>
-                </td>
-                <td><input type="number" name="WorkLoads[${parentIndex}].Sections[${sectionIndex}].LectureHours" class="table-input text-center" value="0" /></td>
-                <td><input type="number" name="WorkLoads[${parentIndex}].Sections[${sectionIndex}].LabHours" class="table-input text-center" value="0" /></td>
-                <td><input type="number" name="WorkLoads[${parentIndex}].Sections[${sectionIndex}].SeminarHours" class="table-input text-center" value="0" /></td>
-                <td><input type="number" name="WorkLoads[${parentIndex}].Sections[${sectionIndex}].SelfStudyHours" class="table-input text-center" value="0" /></td>
-                <td class="text-center">
-                    <button type="button" class="btn btn-sm text-danger" onclick="this.closest('tr').remove()" title="Удалить строку">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </td>
-            `;
-            tbody.appendChild(row);
+            // Загрузка существующих разделов
+            if (data.Sections && data.Sections.length > 0) {
+                data.Sections.forEach((section, index) => {
+                    // Передаем индекс, чтобы он соответствовал массиву на сервере
+                    addSectionRowWithData(currentSemIndex, index, section);
+                });
+            }
+        }
+        
+        // Переименовываем старые функции для совместимости (для кнопки "Добавить семестр")
+        function addSemesterBlock() {
+            addSemesterBlockWithData(semesterIndex);
+        }
+        function addSectionRow(parentIndex) {
+            addSectionRowWithData(parentIndex);
         }
 
         function removeSemester(btn) {
@@ -300,11 +330,40 @@
             }
         }
 
-        // --- AJAX Загрузка данных ---
-        $(document).ready(function () {
-            // ВАЖНО: Мы убрали автоматический вызов addSemesterBlock()
-            // Теперь семестры появляются только по кнопке.
+        // --- 4. Функция для загрузки данных при старте ---
+        function loadExistingData() {
+            // Загрузка семестров и разделов
+            const existingWorkLoads = @Html.Raw(Json.Serialize(Model.WorkLoads ?? new List<WorkLoad>()));
+            
+            existingWorkLoads.forEach(workLoad => {
+                // Используем WorkLoad.Id как основной индекс, если он есть, иначе просто счетчик
+                const workLoadIndex = workLoad.Id || semesterIndex;
+                addSemesterBlockWithData(workLoadIndex, workLoad);
+            });
 
+            // Если семестров не было, ensure semesterIndex is correctly set for future new blocks
+            if (existingWorkLoads.length > 0) {
+                // Находим максимальный ID / индекс для корректного продолжения нумерации
+                const maxIndex = existingWorkLoads.reduce((max, current) => Math.max(max, current.Id || current.Semester || 0), 0);
+                semesterIndex = maxIndex + 1;
+            }
+
+
+            // Если дисциплина уже выбрана, загружаем преподавателей
+            const disciplineId = $('#disciplineSelect').val();
+            if (disciplineId) {
+                // Если мы редактируем, то у нас может быть список Teachers, 
+                // который нужно загрузить, но для AJAX нам всё равно нужно 
+                // вызвать загрузку, чтобы убедиться, что данные актуальны.
+                // В этом примере мы полагаемся на AJAX, как и в Create.
+                $('#disciplineSelect').trigger('change');
+            }
+        }
+
+
+        // --- AJAX Загрузка данных и инициализация ---
+        $(document).ready(function () {
+            
             // Обработка специальности
             $('#specialtySelect').change(function () {
                 var specialtyId = $(this).val();
@@ -342,6 +401,8 @@
                         success: function (data) {
                             if (data.assignedTeachers && data.assignedTeachers.length > 0) {
                                 data.assignedTeachers.forEach(function(dt) {
+                                    // Обратите внимание: TeacherId используется как часть имени поля 
+                                    // для корректной передачи в массив на сервер.
                                     const row = createTeacherRow(dt.id, dt.participationType, dt.name); 
                                     $('#teachersList').append(row);
                                 });
@@ -357,9 +418,14 @@
                 }
             });
             
-            // Восстановление при ререндере (валидация)
-             if ($('#specialtySelect').val()) $('#specialtySelect').trigger('change');
-             if ($('#disciplineSelect').val()) $('#disciplineSelect').trigger('change');
+            // Инициализация. Запускаем загрузку данных, если они были выбраны
+            if ($('#specialtySelect').val()) $('#specialtySelect').trigger('change');
+            
+            // ⭐️ ЗАПУСК ЗАГРУЗКИ СУЩЕСТВУЮЩИХ ДАННЫХ
+            loadExistingData();
+
+            // Восстановление валидации
+            if ($('#disciplineSelect').val()) $('#disciplineSelect').trigger('change');
         });
     </script>
 }

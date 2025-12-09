@@ -704,3 +704,181 @@ a:hover {
     background-color: #d4edda;
     color: #155724;
 }
+
+.create-program-container {
+        padding: 40px 15px;
+        max-width: 1400px; /* Сделали еще шире, так как добавили колонку */
+    }
+
+    .main-card {
+        background: #fff;
+        border-radius: var(--border-radius);
+        box-shadow: var(--card-shadow);
+        border: none;
+        margin-top: 20px;
+        overflow: hidden;
+    }
+
+    .main-card-header {
+        background-color: #fff;
+        padding: 20px 30px;
+        border-bottom: 1px solid #eee;
+        border-left: 6px solid var(--primary-color);
+    }
+
+    .main-card-header h2 {
+        margin: 0;
+        color: var(--primary-color);
+        font-weight: 700;
+        font-size: 1.6rem;
+    }
+
+    .card-body-custom {
+        padding: 30px;
+    }
+
+    /* Инфо-панель (без заголовка) */
+    .info-panel {
+        background-color: #eef5fa;
+        border: 1px solid #dbe7f3;
+        border-radius: 8px;
+        padding: 15px;
+        height: 100%; /* Чтобы растягивалось по высоте */
+    }
+    
+    .info-item { margin-bottom: 8px; }
+    .info-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: #6c757d;
+        font-weight: 700;
+    }
+    .readonly-box {
+        background: transparent;
+        border: none;
+        padding: 0;
+        font-weight: 600;
+        color: #333;
+        width: 100%;
+        outline: none;
+    }
+
+    /* Семестры */
+    .semester-card {
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        margin-bottom: 25px;
+        background: #fff;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+    }
+    
+    .semester-header-custom {
+        background: #f8f9fa;
+        padding: 10px 20px;
+        border-bottom: 1px solid #dee2e6;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .workload-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 15px;
+        padding: 15px;
+        background: #fff;
+        border-bottom: 1px solid #eee;
+    }
+
+    .workload-item label {
+        font-size: 0.75rem;
+        color: #6c757d;
+        text-transform: uppercase;
+        display: block;
+        margin-bottom: 4px;
+    }
+
+    /* Таблица разделов */
+    .sections-wrapper {
+        padding: 15px;
+    }
+    .table-custom th {
+        background-color: #e9ecef;
+        color: #495057;
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-align: center;
+        vertical-align: middle;
+    }
+    .table-custom td {
+        vertical-align: middle;
+    }
+    /* Для инпутов внутри таблицы */
+    .table-input {
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        padding: 4px 8px;
+        width: 100%;
+        font-size: 0.9rem;
+    }
+    .table-input:focus {
+        border-color: var(--accent-color);
+        outline: none;
+    }
+
+    /* Текстовые области (квадратные поля) */
+    .methodical-box {
+        background: #fff;
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        padding: 15px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    .methodical-label {
+        font-weight: 600;
+        color: #004d99;
+        margin-bottom: 10px;
+        display: block;
+    }
+    .textarea-square {
+        flex-grow: 1;
+        border: 1px solid #e2e6ea;
+        border-radius: 4px;
+        padding: 10px;
+        width: 100%;
+        resize: vertical;
+        min-height: 150px; /* Фиксированная минимальная высота */
+        font-size: 0.95rem;
+        transition: border-color 0.2s;
+    }
+    .textarea-square:focus {
+        border-color: var(--accent-color);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+    }
+
+    /* Кнопки */
+    .btn-add-sem {
+        border: 2px dashed #28a745;
+        color: #28a745;
+        background: #f0fff4;
+        font-weight: 600;
+        padding: 12px 20px;
+        width: 100%;
+        transition: 0.3s;
+    }
+    .btn-add-sem:hover {
+        background: #28a745;
+        color: white;
+    }
+    
+    .back-button {
+        text-decoration: none;
+        color: #6c757d;
+        display: inline-flex;
+        align-items: center;
+        font-weight: 500;
+        margin-bottom: 15px;
+    }
