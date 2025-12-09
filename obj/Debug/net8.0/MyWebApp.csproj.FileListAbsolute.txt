@@ -37,3 +37,4 @@ D:\Для Windows 11\Всё подряд\Users\kreck\Desktop\Прочее\Дз �
 D:\Для Windows 11\Всё подряд\Users\kreck\Desktop\Прочее\Дз по Бд ИРНИТУ\Курсовая\Code\MyWebApp\obj\Debug\net8.0\MyWebApp.MvcApplicationPartsAssemblyInfo.cs
 D:\Для Windows 11\Всё подряд\Users\kreck\Desktop\Прочее\Дз по Бд ИРНИТУ\Курсовая\Code\MyWebApp\bin\Debug\net8.0\BouncyCastle.Cryptography.dll
 D:\Для Windows 11\Всё подряд\Users\kreck\Desktop\Прочее\Дз по Бд ИРНИТУ\Курсовая\Code\MyWebApp\bin\Debug\net8.0\itextsharp.dll
+D:\Для Windows 11\Всё подряд\Users\kreck\Desktop\Прочее\Дз по Бд ИРНИТУ\Курсовая\Code\MyWebApp\obj\Debug\net8.0\MyWebApp.sourcelink.json

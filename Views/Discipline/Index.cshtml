@@ -1,0 +1,115 @@
+@model IEnumerable<MyWebApp.Models.Discipline>
+<link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+@{
+    // !!! ИЗМЕНЕНИЕ: Используем ViewBag.IsAdmin вместо ViewBag.CurrentUserRole !!!
+    var isAdmin = (bool)ViewBag.IsAdmin; 
+    
+    // Переменная currentUserRole больше не нужна
+    // var currentUserRole = (string)ViewBag.CurrentUserRole; // УДАЛЕНО
+
+    var newDiscipline = (MyWebApp.Models.Discipline)ViewBag.NewDiscipline;
+    var totalCount = Model.Count();
+    // Получаем ID, который нужно редактировать
+    var editId = ViewBag.EditDisciplineId as int?;
+}
+
+<div class="container discipline-container">
+    
+    <a href="/" class="back-button">
+        <span class="back-icon">←</span> На главную
+    </a>
+
+    <h2 class="discipline-title">📚 Список дисциплин (@totalCount)</h2>
+    
+    @* === БЛОК ДОБАВЛЕНИЯ ДИСЦИПЛИНЫ (ТОЛЬКО ДЛЯ АДМИНА) === *@
+    @if (isAdmin) // ЗАЩИТА АДМИНА
+    {
+        <div class="create-form-section">
+            <h4>Добавить новую дисциплину</h4>
+            
+            <form asp-action="Index" method="post" class="form-add-discipline">
+                
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="input-group">
+                    <input type="text" asp-for="@newDiscipline.Name" class="form-control" placeholder="Название дисциплины (обязательно)" />
+                    <button type="submit" class="btn btn-success add-button">Добавить</button>
+                </div>
+                
+                <span class="text-danger">@Html.ValidationMessageFor(m => newDiscipline.Name)</span>
+            </form>
+        </div>
+        
+        <hr class="separator" />
+    }
+    
+    @* === СПИСОК ДИСЦИПЛИН (С РЕДАКТИРОВАНИЕМ) === *@
+    <div class="discipline-list">
+        @if (Model.Any())
+        {
+            @foreach (var discipline in Model)
+            {
+                // Проверяем, нужно ли отобразить форму редактирования (ТОЛЬКО ДЛЯ АДМИНА И СОВПАДАЮЩЕГО ID)
+                if (isAdmin && discipline.Id == editId) // ИСПОЛЬЗУЕМ isAdmin
+                {
+                    // --- ФОРМА РЕДАКТИРОВАНИЯ ---
+                    @* ... Внутри цикла foreach, блок if (isAdmin && discipline.Id == editId) ... *@
+
+                    <div class="discipline-item edit-mode">
+                        <form asp-action="EditConfirmed" asp-route-id="@discipline.Id" method="post" class="form-inline-edit">
+                            
+                            @* ЯВНО указываем name="Id", чтобы контроллер его увидел *@
+                            <input type="hidden" asp-for="@discipline.Id" name="Id" />
+                            
+                            @Html.AntiForgeryToken()
+                            
+                            <div class="discipline-info">
+                                <div class="discipline-row">
+                                    <div class="discipline-icon">📝</div> 
+                                    
+                                    @* ЯВНО указываем name="Name" *@
+                                    <input type="text" asp-for="@discipline.Name" name="Name" class="form-control edit-input" />
+                                </div>
+                                @* Вывод ошибки *@
+                                <span class="text-danger">@Html.ValidationMessageFor(m => discipline.Name)</span>
+                            </div>
+                            
+                            <div class="admin-actions">
+                                <button type="submit" class="btn btn-sm btn-success">💾 Сохранить</button>
+                                <a asp-action="Index" class="btn btn-sm btn-secondary">Отмена</a>
+                            </div>
+                        </form>
+                    </div>
+                }
+                else
+                {
+                    // --- СТАНДАРТНАЯ КАРТОЧКА ---
+                    <div class="discipline-item">
+
+                        <div class="discipline-info">
+                            <div class="discipline-row">
+                                <div class="discipline-icon">📑</div> 
+                                <div class="discipline-name">@discipline.Name</div>
+                            </div>
+                        </div>
+                        
+                        @if (isAdmin) // ИСПОЛЬЗУЕМ isAdmin
+                        {
+                            <div class="admin-actions">
+                                <a asp-action="Index" asp-route-editId="@discipline.Id" class="btn btn-sm btn-edit">🖊️ Редактировать</a>
+                            </div>
+                        }
+
+                    </div>
+                }
+            }
+        }
+        else
+        {
+            <div class="empty-message">
+                <p>Нет доступных дисциплин.</p>
+            </div>
+        }
+    </div>
+</div>

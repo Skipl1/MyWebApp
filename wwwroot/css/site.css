@@ -503,4 +503,103 @@ a:hover {
     }
 }
 
+/* --- Стили для формы добавления на странице Index --- */
+.create-form-section {
+    margin-bottom: 30px;
+    padding: 15px;
+    /* УДАЛЕНА РАМКА: border: 1px solid #333333; */
+    border-radius: 8px;
+    background-color: #f1f1f1;
+    /* Добавлена легкая тень для отделения от фона */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); 
+}
 
+.create-form-section h4 {
+    margin-top: 0;
+    color: #222222;
+}
+
+.form-add-discipline {
+    display: flex;
+    flex-direction: column;
+}
+
+.input-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.form-control {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid #cccccc; /* Оставил очень светлую рамку для самого поля ввода, чтобы его было видно */
+    border-radius: 4px;
+    color: #000000;
+}
+
+.add-button {
+    background-color: #343a40;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.text-danger {
+    color: #dc3545;
+    font-size: 0.9em;
+    margin-top: 5px;
+    display: block;
+}
+
+.separator {
+    margin-top: 30px;
+    margin-bottom: 30px;
+    border: 0;
+    border-top: 1px solid #dddddd; /* Очень светлый разделитель */
+}
+
+/* --- Стили для списка дисциплин --- */
+.discipline-list {
+    display: flex;
+    flex-direction: column; 
+    gap: 15px; 
+}
+.discipline-item {
+    background: #ffffff;
+    /* УДАЛЕНА РАМКА: border: 1px solid #777; */
+    border-radius: 8px;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /* Легкая тень, заменяющая рамку */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); 
+    transition: all 0.3s ease-in-out; 
+}
+
+/* --- ИНТЕРАКТИВНЫЙ ЭФФЕКТ HOVER --- */
+.discipline-item:hover {
+    transform: translateY(-2px); 
+    /* Тень при наведении, чтобы эффект "подъема" был виден */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); 
+    cursor: pointer;
+}
+
+.discipline-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.discipline-icon {
+    font-size: 1.5em;
+    color: #000000;
+}
+.discipline-name {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #000000;
+}
