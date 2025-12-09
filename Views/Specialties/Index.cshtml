@@ -1,0 +1,45 @@
+@model IEnumerable<dynamic>
+@using System.Linq
+@{
+    ViewData["Title"] = "Список направлений и специальностей";
+}
+<link rel="stylesheet" href="~/css/site.css" />
+@* Добавляем кнопку "На Главную" *@
+<div class="container" style="padding-top: 20px;">
+    <a asp-controller="Home" asp-action="Index" class="back-button">
+        <span class="back-icon">←</span> На Главный Экран
+    </a>
+</div>
+
+<div class="specialty-container">
+    <h1 style="text-align: center;">📚 Список Направлений и Специальностей</h1>
+
+    @if (Model == null || !Model.Any())
+    {
+        <p class="no-data-message">Направления не найдены.</p>
+    }
+    else
+    {
+        @foreach (var group in Model)
+        {
+            <div class="direction-block">
+                <div class="direction-header">
+                    Направление: **@group.DirectionName**
+                </div>
+
+                <ul class="specialty-list">
+                    @foreach (var specialty in group.Specialties)
+                    {
+                        <li class="specialty-item">
+                            @* ИЗМЕНЕНИЕ ЗДЕСЬ: ИСПОЛЬЗУЕМ asp-route-specialtyId *@
+                            <a asp-controller="Curriculum" asp-action="Index" 
+                               asp-route-specialtyId="@specialty.Id" class="specialty-link">
+                                → @specialty.SpecialtyName
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        }
+    }
+</div>

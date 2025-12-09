@@ -1,0 +1,506 @@
+:root {
+    /* Основные цвета */
+    --primary: #2c5aa0;         /* Основной акцентный цвет (синий) */
+    --primary-dark: #1e4278;    /* Темный вариант основного цвета */
+    
+    /* Цвета фона и текста */
+    --bg-body: #f0f2f5;         /* Цвет фона страницы (светло-серый) */
+    --bg-card: #ffffff;         /* Цвет фона карточек и блоков */
+    --bg-hover-light: #f6f8fa;  /* Цвет фона при наведении (очень светлый) */
+    --bg-accent-light: #eaf5ff; /* Светлый фон для акцентов (напр., hover в списках) */
+    
+    --text: #2d3748;            /* Темный основной текст */
+    --text-secondary: #5a6a7a;  /* Второстепенный текст (заменил #666) */
+    --text-primary: var(--primary); /* Текст цветом акцента */
+    
+    /* Границы и разделители */
+    --border: #e2e8f0;          /* Основной цвет границы */
+    --border-dark: #d0d0d0;     /* Более темная граница */
+    --border-light: #eee;       /* Очень светлая граница */
+
+    /* Сообщения */
+    --alert-bg: #fff3cd;        /* Фон для предупреждения */
+    --alert-border: #ffeeba;    /* Граница для предупреждения */
+    --alert-text: #6c757d;      /* Текст для предупреждения */
+    
+    /* Шрифты */
+    --font-sans: "Segoe UI", system-ui, Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-sans);
+    background: var(--bg-body);
+    margin: 0;
+    padding: 0;
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    line-height: 1.6;
+}
+
+/* ---------------------------------------------------- */
+/* 1. Общие элементы */
+/* ---------------------------------------------------- */
+
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+/* Заголовки */
+h1, h2, h3 {
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+    color: var(--text);
+    text-align: center;
+}
+
+h1 {
+    font-size: 2rem;
+    color: var(--primary-dark);
+}
+
+h2 {
+    font-size: 1.5rem;
+    color: var(--primary);
+}
+
+/* Ссылки */
+a {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+a:hover {
+    color: inherit;
+    text-decoration: none;
+}
+
+/* Кнопки */
+.btn {
+    display: inline-block;
+    padding: 0.6rem 1.2rem;
+    font-size: 1rem;
+    font-weight: 500;
+    border-radius: 5px;
+    background-color: var(--primary);
+    color: var(--bg-card); /* Белый текст */
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    border: 1px solid var(--primary);
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.btn:hover {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+}
+
+/* ---------------------------------------------------- */
+/* 2. Главное меню (Index) */
+/* ---------------------------------------------------- */
+
+.welcome-container {
+    text-align: center;
+    padding: 50px 20px 20px 20px;
+}
+
+.username {
+    color: var(--text-primary); /* Используем основной цвет */
+    font-weight: bold;
+}
+
+.main-menu-center {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.main-menu-center h2 {
+    margin-bottom: 30px;
+    font-size: 28px;
+    color: var(--text);
+}
+
+/* Карточки меню */
+.menu-cards {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-top: 2rem;
+}
+
+.menu-card {
+    background: var(--bg-card);
+    border-radius: 15px;
+    text-decoration: none;
+    color: inherit;
+    width: 220px;
+    padding: 30px 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.menu-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.menu-card h3 {
+    margin: 0 0 10px 0;
+    font-size: 20px;
+    text-align: center;
+    color: var(--primary-dark); /* Немного темнее, чем основной текст */
+}
+
+.menu-card p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+/* ---------------------------------------------------- */
+/* 3. Список факультетов / Кафедр */
+/* ---------------------------------------------------- */
+
+.faculty-container h2.faculty-title {
+    margin-top: 20px !important;
+    margin-bottom: 20px !important;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.faculty-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.faculty-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 15px 20px;
+    background: var(--bg-card); /* Светлый фон для карточек */
+    border-radius: 10px;
+    text-decoration: none;
+    color: var(--text);
+    font-size: 18px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+    border: 1px solid var(--border);
+    transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.faculty-card:hover {
+    background: var(--bg-hover-light);
+    transform: translateX(4px); 
+}
+
+.faculty-icon {
+    font-size: 26px;
+    color: var(--primary);
+}
+
+.faculty-name {
+    font-weight: 600;
+}
+
+.faculty-head {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--text);
+    margin-top: 8px;
+}
+.faculty-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ---------------------------------------------------- */
+/* 4. Кнопка "Назад" */
+/* ---------------------------------------------------- */
+
+.back-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg-card);
+    padding: 10px 20px;
+    border-radius: 12px;
+    border: 2px solid var(--border);
+    text-decoration: none;
+    font-size: 17px;
+    color: var(--text);
+    font-weight: 600;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    transition: all 0.25s ease;
+}
+
+.back-button:hover {
+    background: var(--bg-hover-light);
+    border-color: var(--border-dark);
+    transform: translateX(-5px);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+}
+
+.back-icon {
+    font-size: 20px;
+}
+
+/* ---------------------------------------------------- */
+/* 5. Страница Кафедры (department-page) */
+/* ---------------------------------------------------- */
+
+.department-page .faculty-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 30px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.department-page .teacher-card {
+    background-color: var(--bg-card);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.department-page .teacher-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+}
+
+.department-page .teacher-info {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.department-page .teacher-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.department-page .teacher-name {
+    font-weight: 600;
+    font-size: 18px;
+    color: var(--primary-dark);
+}
+
+.department-page .discipline-list {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+.department-page .discipline-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+    border-bottom: 1px dashed var(--border-light);
+    padding-bottom: 5px;
+}
+.department-page .discipline-item:last-child {
+    border-bottom: none;
+}
+
+.department-page .discipline-item button {
+    margin-left: 10px;
+}
+
+.department-page .add-discipline-form {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.department-page .add-discipline-form select,
+.department-page .add-discipline-form input {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border-dark);
+    font-size: 14px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.department-page .add-discipline-form button {
+    width: 150px;
+    align-self: flex-start;
+}
+
+/* ---------------------------------------------------- */
+/* 6. Страница Специальностей (specialty-container) */
+/* ---------------------------------------------------- */
+
+.specialty-container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 20px;
+    background-color: var(--bg-card); 
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    font-family: var(--font-sans);
+}
+
+/* Заголовок страницы */
+.specialty-container h1 {
+    font-size: 2.2em;
+    color: var(--primary-dark);
+    margin-bottom: 30px;
+    border-bottom: 3px solid var(--primary); /* Акцентный цвет */
+    padding-bottom: 10px;
+}
+
+/* Блок направления */
+.direction-block {
+    margin-bottom: 30px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.direction-block:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Заголовок направления */
+.direction-header {
+    background-color: var(--primary); 
+    color: var(--bg-card); /* Белый текст */
+    padding: 15px 20px;
+    font-size: 1.4em;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+/* Список специальностей */
+.specialty-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    background-color: var(--bg-card);
+}
+
+/* Элемент списка специальностей */
+.specialty-item {
+    border-bottom: 1px solid var(--border-light);
+    transition: background-color 0.2s;
+}
+
+.specialty-item:last-child {
+    border-bottom: none;
+}
+
+.specialty-item:hover {
+    background-color: var(--bg-accent-light); 
+}
+
+/* Ссылка на специальность */
+.specialty-link {
+    display: block;
+    padding: 12px 25px;
+    text-decoration: none;
+    color: var(--text);
+    font-size: 1.1em;
+    transition: color 0.2s;
+}
+
+.specialty-link:hover {
+    color: var(--primary-dark); 
+    font-weight: 500;
+}
+
+/* Стиль для сообщения об отсутствии данных */
+.no-data-message {
+    text-align: center;
+    padding: 40px;
+    font-size: 1.2em;
+    color: var(--alert-text);
+    background-color: var(--alert-bg);
+    border: 1px solid var(--alert-border);
+    border-radius: 8px;
+}
+
+/* ---------------------------------------------------- */
+/* 7. Анимации и Адаптивность */
+/* ---------------------------------------------------- */
+
+.hidden-form {
+    display: none;
+    animation: slideDown 0.25s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 600px) {
+    .container {
+        padding: 0 1rem;
+    }
+
+    .menu-cards {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .menu-card {
+        width: 100%;
+    }
+
+    .department-page .faculty-list {
+        max-width: 100%;
+        padding: 0 10px;
+    }
+
+    .department-page .discipline-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .department-page .add-discipline-form button {
+        width: 100%;
+    }
+}
+
+

@@ -1,0 +1,98 @@
+/* _content/MyWebApp/Views/Shared/_Layout.cshtml.rz.scp.css */
+:root[b-qgspnya79y] {
+  --primary: #2c5aa0;
+  --primary-dark: #1e4278;
+  --font-sans: "Segoe UI", system-ui, Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+*[b-qgspnya79y] {
+  box-sizing: border-box;
+}
+
+body[b-qgspnya79y] {
+  margin: 0;
+  font-family: var(--font-sans);
+}
+
+.container[b-qgspnya79y] {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+/* Шапка — тёмно-синяя, академическая */
+.navbar[b-qgspnya79y] {
+  background-color: var(--primary);
+  padding: 1rem 0;
+  margin-bottom: 2rem;
+  color: white;
+}
+
+.navbar > .container[b-qgspnya79y] {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.navbar h1[b-qgspnya79y],
+.navbar .title-text[b-qgspnya79y] {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: white;
+  margin: 0;
+}
+
+/* Кнопки в шапке */
+.btn-outline-light[b-qgspnya79y] {
+  display: inline-block;
+  padding: 0.55rem 1.25rem;
+  font-size: 1rem;
+  font-weight: 500;
+  background-color: transparent;
+  border: 2px solid white;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.btn-outline-light:hover[b-qgspnya79y] {
+  background-color: white;
+  color: var(--primary);
+}
+
+/* Форма выхода (чтобы кнопка не "прыгала") */
+.navbar form[b-qgspnya79y] {
+  display: inline;
+  margin: 0;
+}
+
+/* Футер (минимум) */
+footer[b-qgspnya79y] {
+  background-color: white;
+  border-top: 1px solid #e2e8f0;
+  padding: 1rem 0;
+  text-align: center;
+  color: #718096;
+  font-size: 0.875rem;
+}
+
+/* Адаптивность */
+@media (max-width: 767px) {
+  .container[b-qgspnya79y] {
+    padding: 0 1rem;
+  }
+
+  .navbar > .container[b-qgspnya79y] {
+    gap: 0.75rem;
+  }
+
+  .btn-outline-light[b-qgspnya79y] {
+    padding: 0.5rem 1rem;
+    font-size: 0.95rem;
+  }
+}

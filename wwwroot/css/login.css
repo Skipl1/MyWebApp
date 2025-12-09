@@ -1,0 +1,130 @@
+/* -------------------------------------------
+   ОБЩИЕ ПЕРЕМЕННЫЕ (можно добавить в site.css)
+   ------------------------------------------- */
+:root {
+    /* Предполагаемый цвет кнопки из background-color: var(--primary-dark); */
+    --primary-dark: #3a628a; 
+    --background-color: #f2f4f7;
+    --card-shadow: 0 8px 25px rgba(0,0,0,0.08);
+}
+
+
+/* -------------------------------------------
+   1. КОНТЕЙНЕРЫ И КАРТОЧКА
+   ------------------------------------------- */
+
+/* Найдите стиль для центрирующего контейнера */
+.login-background {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #ffffff; /* ✅ Чистый белый */
+    /* ИЛИ: background-color: transparent; */
+}
+
+/* Стиль для карточки входа (заменяет инлайновые стили во внутреннем div) */
+.login-card {
+    width: 400px;
+    background: #ffffff;
+    padding: 35px 40px;
+    border-radius: 18px;
+    box-shadow: var(--card-shadow);
+}
+
+/* -------------------------------------------
+   2. ЗАГОЛОВОК И ОШИБКИ
+   ------------------------------------------- */
+
+/* Стиль для H2 (заменяет инлайновые стили в h2) */
+.login-card h2 {
+    text-align: center;
+    margin-bottom: 25px;
+    font-weight: 700;
+    color: #333;
+}
+
+/* Стиль для блока ошибки (заменяет инлайновые стили в .alert.alert-danger) */
+.login-card .alert-danger {
+    border-radius: 10px;
+    margin-bottom: 20px;
+    /* Убедитесь, что color и background-color определены в Bootstrap или site.css */
+    /* Для полной кастомизации можно добавить:
+    color: #842029;
+    background-color: #f8d7da; */
+}
+
+
+/* -------------------------------------------
+   3. ФОРМА (МЕТКИ И ПОЛЯ)
+   ------------------------------------------- */
+
+/* Стиль для контейнеров Логин/Пароль (заменяет инлайновые стили в div.form-group) */
+.login-card .form-group {
+    display: flex;
+    align-items: center;
+}
+
+/* Стиль для метки (заменяет инлайновые стили в label) */
+.login-card label {
+    font-weight: 600;
+    width: 80px; /* Фиксированная ширина для выравнивания */
+}
+
+/* Стиль для поля ввода (заменяет инлайновые стили в input.form-control) */
+.login-card .form-control {
+    height: 45px;
+    border-radius: 10px;
+    flex-grow: 1;
+    margin-left: 15px;
+}
+
+/* -------------------------------------------
+   4. КНОПКА
+   ------------------------------------------- */
+
+/* Стиль для кнопки (заменяет инлайновые стили в button[type="submit"]) */
+.login-card button[type="submit"] {
+    background-color: var(--primary-dark);
+    color: white;
+    padding: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 10px;
+    transition: 0.2s;
+    width: 100%; /* Добавлено, так как класс w-100 подразумевает полную ширину */
+}
+
+/* Убедитесь, что класс .w-100 из Bootstrap присутствует,
+   либо добавьте ширину 100% к кнопке, как показано выше. */
+
+/* Добавление эффектов наведения (hover) для кнопки */
+.login-card button[type="submit"]:hover {
+    opacity: 0.9;
+}
+
+/* -------------------------------------------
+   СТИЛИ ОШИБКИ
+   ------------------------------------------- */
+
+/* Общий стиль для блока ошибки */
+.login-error-message {
+    /* Переопределяем некоторые стили Bootstrap для alert-danger */
+    border-radius: 10px !important; 
+    margin-bottom: 20px;
+    
+    /* Делаем блок flex-контейнером для выравнивания иконки и текста */
+    display: flex;
+    align-items: center;
+    padding: 12px 15px; /* Улучшенное внутреннее заполнение */
+    
+    /* Дополнительные стили для выделения (если Bootstrap не справляется) */
+    font-weight: 500;
+}
+
+/* Стиль для иконки */
+.login-error-message .error-icon {
+    font-size: 1.2em; /* Немного увеличим иконку */
+    margin-right: 10px;
+    /* Убедитесь, что цвет иконки совпадает с цветом текста ошибки */
+}

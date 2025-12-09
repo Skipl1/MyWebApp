@@ -1,0 +1,52 @@
+﻿@using System.Security.Claims
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Учебная система</title>
+    <link rel="stylesheet" href="~/css/layout.css" />
+</head>
+<body>
+    <header class="navbar">
+        <div class="container navbar-bar">
+            <div class="navbar-title">
+                Учебная система
+            </div>
+
+            <div class="navbar-user">
+                @if (User?.Identity?.IsAuthenticated == true)
+                {
+                    // Получаем ФИО и роль безопасно
+                    var fullName = User.FindFirst("FullName")?.Value
+                                   ?? User.Identity?.Name
+                                   ?? "Пользователь";
+                    var role = User.FindFirst(ClaimTypes.Role)?.Value ?? "";
+
+                    <div class="user-info">
+                        <div class="user-text-vertical">
+                            <div class="full-name"><strong>ФИО:</strong> @fullName</div>
+                            @if (!string.IsNullOrEmpty(role))
+                            {
+                                <div class="user-role"><strong>Роль:</strong> @role</div>
+                            }
+                        </div>
+                    </div>
+
+                    <form asp-controller="Account" asp-action="Logout" method="post" style="margin:0;">
+                        <button type="submit" class="btn-outline-light">Выйти</button>
+                    </form>
+                }
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <main role="main">
+            @RenderBody()
+        </main>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,21 @@
+@model IEnumerable<Faculty>
+<link rel="stylesheet" href="~/css/site.css" />
+
+<div class="container faculty-container">
+    <a href="/Home/Index" class="back-button">
+        <span class="back-icon">←</span> Главная
+    </a>
+
+
+    <h2 class="faculty-title">Список факультетов</h2>
+
+    <div class="faculty-list">
+        @foreach (var faculty in Model)
+        {
+            <a class="faculty-card" href="/Departments?facultyId=@faculty.Id">
+                <div class="faculty-icon">🏛️</div>
+                <div class="faculty-name">@faculty.Name</div>
+            </a>
+        }
+    </div>
+</div>

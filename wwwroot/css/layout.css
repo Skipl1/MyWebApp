@@ -1,0 +1,117 @@
+:root {
+    --primary: #3458A1;       /* основной синий */
+    --primary-dark: #233766;  /* тёмный оттенок */
+    --font-sans: "Segoe UI", system-ui, Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: var(--font-sans);
+}
+
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+/* ШАПКА */
+.navbar {
+    background-color: var(--primary);
+    padding: 1rem 0;
+    margin-bottom: 2rem;
+    color: white;
+}
+
+.navbar > .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.navbar-title {
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: white;
+}
+
+/* КНОПКИ */
+.btn-outline-light {
+    padding: 0.55rem 1.2rem;
+    font-size: 1rem;
+    font-weight: 500;
+    border: 2px solid white;
+    color: white;
+    background: transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+.btn-outline-light:hover {
+    background: white;
+    color: var(--primary-dark);
+}
+
+/* Блок user справа */
+.navbar-user {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* Вертикальный текст — ФИО и роль */
+.user-text-vertical {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    text-align: right;
+    gap: 0.15rem;
+}
+
+/* ФИО и роль одного цвета и размера */
+.full-name,
+.user-role {
+    color: white;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+/* Чтобы кнопка выхода не прилипала */
+.navbar-user form {
+    margin-left: 0.8rem;
+}
+
+/* FOOTER */
+footer {
+    border-top: 1px solid #d9e0ec;
+    padding: 1rem 0;
+    text-align: center;
+    font-size: 0.88rem;
+    color: #5c677d;
+}
+
+/* АДАПТИВ */
+@media (max-width: 600px) {
+    .navbar > .container {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.6rem;
+    }
+
+    .user-text-vertical {
+        align-items: flex-start;
+        text-align: left;
+    }
+
+    .navbar-user form {
+        margin-left: 0;
+    }
+}

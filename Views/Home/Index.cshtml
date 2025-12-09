@@ -1,0 +1,35 @@
+@{
+    ViewData["Title"] = "Главная";
+}
+
+<link rel="stylesheet" href="~/css/site.css" />
+
+<div class="welcome-container container">
+    <h1>Добро пожаловать, <span class="username">@ViewBag.UserName</span>!</h1>
+</div>
+
+<main class="container main-menu-center">
+    <h2>Навигация по системе</h2>
+    <div class="menu-cards">
+        <a href="/Faculty" class="menu-card">
+            <div class="card-content">
+                <h3>Факультеты</h3>
+            </div>
+        </a>
+        <a href="/Specialties" class="menu-card">
+            <div class="card-content">
+                <h3>Специальности</h3>
+            </div>
+        </a>
+        <a href="/AcademicProgram" class="menu-card">
+            <div class="card-content">
+                <h3>Учебные программы</h3>
+            </div>
+        </a>
+        <a href="/Discipline" class="menu-card">
+            <div class="card-content">
+                <h3>Дисциплины</h3>
+            </div>
+        </a>
+    </div>
+</main>
