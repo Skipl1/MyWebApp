@@ -1,0 +1,85 @@
+@model IEnumerable<MyWebApp.Models.AcademicProgram>
+
+@{
+    ViewData["Title"] = "Учебные программы";
+    // Получаем флаг администратора (убедитесь, что он передается из контроллера)
+    var isAdmin = (bool?)ViewBag.IsAdmin ?? false; 
+}
+
+<link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+<div class="container program-container">
+    
+    <a href="/" class="back-button">
+        <span class="back-icon">←</span> На главную
+    </a>
+
+    <h2 class="program-page-title">🎓 Учебные программы (@Model.Count())</h2>
+
+    @* === БЛОК ДОБАВЛЕНИЯ ПРОГРАММЫ (ТОЛЬКО ДЛЯ АДМИНА) === *@
+    @if (isAdmin)
+    {
+        <div class="admin-actions-bar">
+            <a asp-controller="AcademicProgram" asp-action="Create" class="btn btn-primary add-program-button">
+                Добавить программу
+            </a>
+        </div>
+        <hr class="separator" />
+    }
+
+    <div class="program-list">
+        @if (Model.Any())
+        {
+            @foreach (var item in Model)
+            {
+                // Вся карточка - это ссылка на Details
+                <a asp-action="Details" asp-route-id="@item.Id" class="program-card">
+                    
+                    @* === БЛОК 1: ДИСЦИПЛИНА И ГОД (ГЛАВНЫЙ ЗАГОЛОВОК) === *@
+                    <div class="program-discipline-header">
+                        <h3 class="program-discipline-name">@item.Discipline?.Name</h3>
+                        <span class="program-year-badge">@item.StartYear</span>
+                    </div>
+
+                    @* === БЛОК 2: СПЕЦИАЛЬНОСТЬ, НАПРАВЛЕНИЕ, НАЗВАНИЕ ПРОГРАММЫ === *@
+                    <div class="program-body">
+                        <p class="program-specialty-info">
+                            <span class="label">Специальность:</span> 
+                            <span class="value specialty-name">@item.Specialty?.Name</span>
+                        </p>
+                        <p class="program-specialty-info">
+                            <span class="label">Направление:</span> 
+                            <span class="value">@item.Specialty?.Direction</span>
+                        </p>
+                        
+                        @* Название самой программы *@
+                        <p class="program-name-value">Программа: @item.Name</p>
+                    </div>
+
+                    @* === БЛОК 3: ДЕТАЛИ И СТАТУС (FOOTER) === *@
+                    <div class="program-footer">
+                        <div class="footer-item">
+                            <span class="icon">⏳</span> @item.Specialty?.Duration лет
+                        </div>
+                        <div class="footer-item">
+                            <span class="icon">🎓</span> @item.Specialty?.Qualification
+                        </div>
+                        <div class="footer-item">
+                            @* Меняем цвет статуса в зависимости от текста *@
+                            <span class="status-indicator @(item.Status == "approved" ? "status-green" : "status-gray")">
+                                @item.Status
+                            </span>
+                        </div>
+                    </div>
+
+                </a>
+            }
+        }
+        else
+        {
+            <div class="empty-message">
+                Нет доступных учебных программ.
+            </div>
+        }
+    </div>
+</div>

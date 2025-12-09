@@ -18,6 +18,14 @@ build_property.GenerateRazorMetadataSourceChecksumAttributes =
 build_property.MSBuildProjectDirectory = D:\Для Windows 11\Всё подряд\Users\kreck\Desktop\Прочее\Дз по Бд ИРНИТУ\Курсовая\Code\MyWebApp
 build_property._RazorSourceGeneratorDebug = 
 
+[D:/Для Windows 11/Всё подряд/Users/kreck/Desktop/Прочее/Дз по Бд ИРНИТУ/Курсовая/Code/MyWebApp/Views/AcademicProgram/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNhZGVtaWNQcm9ncmFtXENyZWF0ZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/Для Windows 11/Всё подряд/Users/kreck/Desktop/Прочее/Дз по Бд ИРНИТУ/Курсовая/Code/MyWebApp/Views/AcademicProgram/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNhZGVtaWNQcm9ncmFtXEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [D:/Для Windows 11/Всё подряд/Users/kreck/Desktop/Прочее/Дз по Бд ИРНИТУ/Курсовая/Code/MyWebApp/Views/Account/Login.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxMb2dpbi5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 

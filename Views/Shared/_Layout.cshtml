@@ -20,8 +20,8 @@
                 {
                     // Получаем ФИО и роль безопасно
                     var fullName = User.FindFirst("FullName")?.Value
-                                   ?? User.Identity?.Name
-                                   ?? "Пользователь";
+                                         ?? User.Identity?.Name
+                                         ?? "Пользователь";
                     var role = User.FindFirst(ClaimTypes.Role)?.Value ?? "";
 
                     <div class="user-info">
@@ -47,6 +47,13 @@
             @RenderBody()
         </main>
     </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    
+    @* 🔑 КЛЮЧЕВАЯ СТРОКА: Рендеринг секции "Scripts" 🔑 *@
+    @RenderSection("Scripts", required: false) 
 
 </body>
 </html>

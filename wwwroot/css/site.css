@@ -603,3 +603,104 @@ a:hover {
     font-weight: bold;
     color: #000000;
 }
+
+/*Нравится стиль*/
+.program-card {
+    display: block;
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    text-decoration: none;
+    color: inherit;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    transition: all 0.3s ease-in-out;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Эффект при наведении */
+.program-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+}
+
+/* --- НОВЫЕ СТИЛИ ДЛЯ ЗАГОЛОВКА ДИСЦИПЛИНЫ --- */
+.program-discipline-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #343a40; /* Толстая черная линия */
+    margin-bottom: 15px;
+}
+
+.program-discipline-name {
+    margin: 0;
+    font-size: 1.5em; /* Делаем название дисциплины самым крупным */
+    color: #000;
+    font-weight: 700;
+}
+
+.program-year-badge {
+    background-color: #343a40;
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    font-weight: bold;
+}
+
+/* Тело: Специальность и Направление */
+.program-body {
+    margin-bottom: 15px;
+}
+
+.program-specialty-info {
+    margin: 5px 0;
+    font-size: 1em;
+}
+
+.program-specialty-info .label {
+    font-weight: 500;
+    color: #555; /* Подписи серым */
+    min-width: 100px; /* Выравниваем подписи */
+    display: inline-block;
+}
+
+.program-specialty-info .value {
+    font-weight: bold;
+    color: #222;
+}
+
+.program-name-value {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed #ddd;
+    font-style: italic;
+    color: #777;
+    font-size: 0.95em;
+}
+
+/* Подвал: Детали (без изменений, но для полноты) */
+.program-footer {
+    display: flex;
+    gap: 20px;
+    font-size: 0.9em;
+    color: #333;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+}
+
+.status-indicator {
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.85em;
+    text-transform: capitalize;
+    background-color: #e9ecef;
+    color: #333;
+}
+
+.status-green {
+    background-color: #d4edda;
+    color: #155724;
+}
