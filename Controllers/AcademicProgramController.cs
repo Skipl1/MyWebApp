@@ -41,6 +41,7 @@ namespace MyWebApp.Controllers
 
             var program = await _context.AcademicPrograms
                 .Include(ap => ap.Specialty)
+                    .ThenInclude(s => s.Department) // <--- ВАЖНО: Добавляем загрузку кафедры!
                 .Include(ap => ap.Discipline)
                     .ThenInclude(d => d.DisciplineTeachers)
                         .ThenInclude(dt => dt.Teacher)
@@ -54,27 +55,67 @@ namespace MyWebApp.Controllers
             // 1. Проверка роли Администратора
             bool isAdmin = User.IsInRole("admin");
 
-            // 2. Проверка, является ли пользователь назначенным преподавателем
-            bool isAssignedTeacher = false;
-            
-            // Получаем строковый ID текущего пользователя
-            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            // Получаем ID текущего пользователя
+            var currentUserIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            int currentUserId = 0;
+            bool isUserIdValid = int.TryParse(currentUserIdStr, out currentUserId);
 
-            // ⭐️ ИСПРАВЛЕНИЕ ОШИБКИ: Пытаемся преобразовать строковый ID в int.
-            if (!string.IsNullOrEmpty(currentUserId) && program.Discipline != null)
+            // 2. Проверка назначенного преподавателя
+            bool isAssignedTeacher = false;
+            if (isUserIdValid && program.Discipline != null)
             {
-                if (int.TryParse(currentUserId, out int userIdInt))
+                isAssignedTeacher = program.Discipline.DisciplineTeachers
+                    .Any(dt => dt.TeacherId == currentUserId);
+            }
+
+            // 3. --- НОВАЯ ЛОГИКА: Проверка Заведующего кафедрой ---
+            bool isHeadOfDepartment = false;
+            if (isUserIdValid && program.Specialty?.Department != null)
+            {
+                // Сравниваем ID текущего юзера с HeadId кафедры, к которой относится специальность
+                isHeadOfDepartment = (program.Specialty.Department.HeadId == currentUserId);
+            }
+            // -----------------------------------------------------
+
+            ViewBag.CanEdit = isAdmin || isAssignedTeacher;
+            ViewBag.IsHeadOfDepartment = isHeadOfDepartment; // Передаем флаг в View
+
+            return View(program);
+        }
+
+        // 2. НОВЫЙ МЕТОД ДЛЯ СМЕНЫ СТАТУСА (Принять/Отклонить)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangeStatus(int id, string newStatus)
+        {
+            var program = await _context.AcademicPrograms
+                .Include(ap => ap.Specialty)
+                .ThenInclude(s => s.Department)
+                .FirstOrDefaultAsync(ap => ap.Id == id);
+
+            if (program == null) return NotFound();
+
+            // Получаем ID текущего пользователя
+            var currentUserIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!int.TryParse(currentUserIdStr, out int currentUserId)) return Forbid();
+
+            // Проверка: это действительно зав. кафедрой?
+            bool isHeadOfDepartment = program.Specialty?.Department?.HeadId == currentUserId;
+
+            if (!isHeadOfDepartment) return Forbid();
+
+            // Проверка логики статусов (чтобы нельзя было хакнуть через Postman)
+            // Разрешаем менять статус только если текущий статус draft или recheck
+            if (program.Status == "draft" || program.Status == "recheck")
+            {
+                if (newStatus == "approved" || newStatus == "rejected")
                 {
-                    isAssignedTeacher = program.Discipline.DisciplineTeachers
-                        // Сравнение int == int
-                        .Any(dt => dt.TeacherId == userIdInt); 
+                    program.Status = newStatus;
+                    await _context.SaveChangesAsync();
                 }
             }
 
-            // 3. Передаем флаг для условного отображения кнопки "Редактировать" в представлении
-            ViewBag.CanEdit = isAdmin || isAssignedTeacher;
-
-            return View(program);
+            return RedirectToAction(nameof(Details), new { id = program.Id });
         }
 
 
@@ -91,7 +132,7 @@ namespace MyWebApp.Controllers
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "admin")]
         public async Task<IActionResult> Create(
-            [Bind("Name,SpecialtyId,DisciplineId,StartYear,Goals,Requirements,DisciplinePosition,Literature,Status,WorkLoads")] AcademicProgram program)
+            [Bind("Name,SpecialtyId,DisciplineId,StartYear,Goals,Requirements,DisciplinePosition,Literature,Status,WorkLoads,Competencies")] AcademicProgram program)
         {
             ApplyDefaultStatusAndClearModelErrors(program);
             
@@ -105,11 +146,6 @@ namespace MyWebApp.Controllers
                 }
                 else
                 {
-                    if (string.IsNullOrEmpty(program.Competencies)) 
-                    {
-                        program.Competencies = specialty.Qualification;
-                    }
-                    
                     _context.Add(program);
                     await _context.SaveChangesAsync();
                     return RedirectToAction(nameof(Index));
@@ -150,27 +186,39 @@ namespace MyWebApp.Controllers
         {
             if (id != program.Id) return NotFound();
 
+            // 1. ПОЛУЧАЕМ ТЕКУЩИЙ СТАТУС ИЗ БД (до любых изменений)
+            // Используем Select, чтобы загрузить только поле Status, это эффективно.
+            var originalStatus = await _context.AcademicPrograms
+                .Where(p => p.Id == id)
+                .Select(p => p.Status)
+                .FirstOrDefaultAsync();
+
             // Применяем статус по умолчанию и очищаем ошибки валидации
             ApplyDefaultStatusAndClearModelErrors(program);
+
+            // 2. ЛОГИКА ИЗМЕНЕНИЯ СТАТУСА ПЕРЕД СОХРАНЕНИЕМ
+            
+            // Если программа уже была 'approved' И была отредактирована
+            if ((originalStatus?.ToLower() == "approved" || originalStatus?.ToLower() == "rejected") && program.Status?.ToLower() != "recheck")
+            {
+                // Принудительно устанавливаем статус "Перепроверить"
+                program.Status = "recheck";
+            }
+            else
+            {
+                // Если программа была 'draft' или 'recheck', оставляем статус, который пришел из формы.
+                // Если при редактировании программы 'draft' не меняется статус, он остается 'draft'.
+                // Если при редактировании программы 'recheck' не меняется статус, он остается 'recheck'.
+                // Если статус не был 'approved', мы не вмешиваемся в логику.
+            }
+
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    // 1. Обработка вложенных коллекций (вероятно, здесь происходит загрузка сущности в память)
+                    // 3. Обработка вложенных коллекций (загружает и обновляет WorkLoads/Sections)
                     await UpdateNestedCollections(program);
-                    
-                    // 2. Поиск специальности для заполнения компетенций
-                    var specialty = await _context.Specialties.FirstOrDefaultAsync(s => s.Id == program.SpecialtyId);
-                    if (specialty != null)
-                    {
-                        if (string.IsNullOrEmpty(program.Competencies)) 
-                        {
-                            program.Competencies = specialty.Qualification;
-                        }
-                    }
-                    
-                    // --- ИСПРАВЛЕНИЕ НАЧАЛО ---
                     
                     // Ищем, есть ли этот AcademicProgram уже в памяти (в ChangeTracker)
                     var trackedProgram = _context.ChangeTracker.Entries<AcademicProgram>()
@@ -178,32 +226,30 @@ namespace MyWebApp.Controllers
 
                     if (trackedProgram != null)
                     {
-                        // Если сущность уже отслеживается (загружена в UpdateNestedCollections),
-                        // мы просто копируем в неё новые простые значения (Name, Status и т.д.) из формы.
-                        // Коллекции (WorkLoads) не затронутся, так как SetValues их игнорирует (это правильно).
+                        // Если сущность уже отслеживается, копируем в неё новые простые значения
+                        // (включая только что установленный статус 'recheck' или оригинальный статус).
                         _context.Entry(trackedProgram).CurrentValues.SetValues(program);
                     }
                     else
                     {
-                        // Если в памяти объекта нет (маловероятно при вашей ошибке, но для страховки),
-                        // тогда обновляем целиком
+                        // Если не отслеживается (страховка), обновляем целиком
                         _context.Update(program);
                     }
                     
-                    // --- ИСПРАВЛЕНИЕ КОНЕЦ ---
-
                     await _context.SaveChangesAsync();
                 }
-                catch (Exception ex) // Перехватываем исключение
+                catch (Exception ex) 
                 {
-                    // Здесь код обработки ошибки, например, логирование
-                    // или возврат ошибки пользователю
                     ModelState.AddModelError("", "Ошибка при сохранении данных: " + ex.Message);
+                    // Если есть ошибка, перезагружаем списки перед возвратом View
+                    await PopulateDropDowns(program.SpecialtyId, program.DisciplineId);
+                    return View(program);
                 }
+                
                 return RedirectToAction(nameof(Index));
             }
 
-            // Если есть ошибки, перезагружаем списки
+            // Если есть ошибки валидации, перезагружаем списки
             await PopulateDropDowns(program.SpecialtyId, program.DisciplineId);
             return View(program);
         }
@@ -260,7 +306,6 @@ namespace MyWebApp.Controllers
                 allTeachers = allTeachers
             });
         }
-
 
         // ---------------------------------------------------------------------------------
         // --- ПРИВАТНЫЕ ХЕЛПЕРЫ EF CORE ---
@@ -417,6 +462,40 @@ namespace MyWebApp.Controllers
 
         // --- Добавьте этот метод в AcademicProgramController ---
 
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "admin")] // Только админ может удалять
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            // 1. Загружаем программу вместе с WorkLoads и Sections
+            var program = await _context.AcademicPrograms
+                .Include(p => p.WorkLoads)
+                    .ThenInclude(w => w.Sections) // Включаем Sections внутри WorkLoads
+                .FirstOrDefaultAsync(p => p.Id == id);
+            
+            if (program != null)
+            {
+                // 2. Вручную удаляем дочерние элементы
+                foreach (var workload in program.WorkLoads.ToList())
+                {
+                    // Удаляем Sections, связанные с каждым WorkLoad
+                    _context.Sections.RemoveRange(workload.Sections);
+                }
+                
+                // Удаляем WorkLoads
+                _context.WorkLoads.RemoveRange(program.WorkLoads);
+                
+                // 3. Удаляем саму программу
+                _context.AcademicPrograms.Remove(program);
+                
+                await _context.SaveChangesAsync();
+            }
+            
+            return RedirectToAction(nameof(Index)); 
+        }
+
+
         public async Task<IActionResult> Download(int id)
         {
             // 1. ПОЛНАЯ ЗАГРУЗКА ВСЕХ ДАННЫХ
@@ -483,8 +562,8 @@ namespace MyWebApp.Controllers
             // Строка 3
             AddSimpleCell(mainInfoTable, "Специальность", fontBold, 1);
             AddSimpleCell(mainInfoTable, program.Specialty?.Name, fontNormal, 1);
-            AddSimpleCell(mainInfoTable, "Компетенции", fontBold, 1);
-            AddSimpleCell(mainInfoTable, program.Competencies, fontNormal, 1);
+            AddSimpleCell(mainInfoTable, "Квалификация", fontBold, 1);
+            AddSimpleCell(mainInfoTable, program.Specialty?.Qualification, fontNormal, 1);
 
             // Строка 4
             AddSimpleCell(mainInfoTable, "Год начала", fontBold, 1);
@@ -592,6 +671,7 @@ namespace MyWebApp.Controllers
 
             // Используем вспомогательный метод для простого вывода текста
             AddSimpleTextBlock(doc, "Цели и задачи", program.Goals, fontBold, fontNormal);
+            AddSimpleTextBlock(doc, "Компетенции", program.Competencies, fontBold, fontNormal);
             AddSimpleTextBlock(doc, "Требования", program.Requirements, fontBold, fontNormal);
             AddSimpleTextBlock(doc, "Место дисциплины", program.DisciplinePosition, fontBold, fontNormal);
             AddSimpleTextBlock(doc, "Литература", program.Literature, fontBold, fontNormal);

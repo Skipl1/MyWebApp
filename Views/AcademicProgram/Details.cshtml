@@ -2,14 +2,18 @@
 
 @{
     ViewData["Title"] = "Детали программы";
-    // 💡 ПРИМЕЧАНИЕ: Предполагается, что вы передаете булево значение из контроллера, 
-    // которое указывает, является ли текущий пользователь назначенным преподавателем.
-    // Если вы используете ASP.NET Identity, вы можете выполнить проверку напрямую здесь.
-    bool isAssignedTeacher = ViewBag.IsAssignedTeacher ?? false; // Получаем флаг из ViewBag
-    bool isAdmin = User.IsInRole("Admin"); // Проверка на роль Admin
     
-    // Определяем, должен ли пользователь видеть кнопку редактирования
-    bool canEdit = isAdmin || isAssignedTeacher;
+    bool isAssignedTeacher = ViewBag.IsAssignedTeacher ?? false;
+    bool isAdmin = ViewBag.IsAdmin ?? false; // Или User.IsInRole("admin")
+    bool canEdit = ViewBag.CanEdit ?? false;
+    bool isHeadOfDepartment = ViewBag.IsHeadOfDepartment ?? false;
+
+    // --- ЛОГИКА ОТОБРАЖЕНИЯ КНОПОК РЕЗОЛЮЦИИ ---
+    // Кнопки видны, только если:
+    // 1. Пользователь - зав. кафедрой
+    // 2. Статус программы "draft" (черновик) ИЛИ "recheck" (на проверке)
+    bool showResolutionButtons = isHeadOfDepartment 
+                                 && (Model.Status == "draft" || Model.Status == "recheck");
 }
 
 <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
@@ -20,31 +24,97 @@
         <a asp-action="Index" class="back-button">
             <i class="fas fa-arrow-left mr-2"></i> Назад к списку
         </a>
+
+        @* Отображение текущего статуса *@
+        <div>
+            Статус: 
+            @if(Model.Status == "approved") 
+            { 
+                <span class="badge badge-success" style="font-size: 1em; padding: 10px;">✅ Принято (Approved)</span> 
+            }
+            else if(Model.Status == "rejected") 
+            { 
+                <span class="badge badge-danger" style="font-size: 1em; padding: 10px;">❌ Отклонено (Rejected)</span> 
+            }
+            else if(Model.Status == "recheck") 
+            { 
+                <span class="badge badge-warning" style="font-size: 1em; padding: 10px;">⚠️ Требует проверки</span> 
+            }
+            else 
+            { 
+                <span class="badge badge-secondary" style="font-size: 1em; padding: 10px;">📝 Черновик (Draft)</span> 
+            }
+        </div>
     </div>
 
     <div class="main-card">
         <div style="text-align: center; margin-top: 20px;">
             <h2>Учебная программа — Детали</h2>
             
-            <div class="d-flex justify-content-center align-items-center mb-4">
+            <div class="d-flex justify-content-center align-items-center mb-4 flex-wrap">
                 
+                @* 1. КНОПКА СКАЧАТЬ *@
                 <a asp-controller="AcademicProgram" 
                    asp-action="Download" 
                    asp-route-id="@Model.Id" 
-                   class="btn btn-primary mr-3">
-                    ⬇️ Скачать PDF
+                   class="btn btn-primary mr-3 mb-2">
+                   ⬇️ Скачать PDF
                 </a>
 
-                @if (ViewBag.CanEdit)
+                @* 2. КНОПКА РЕДАКТИРОВАТЬ *@
+                @if (canEdit)
                 {
                     <a asp-controller="AcademicProgram" 
                        asp-action="Edit" 
                        asp-route-id="@Model.Id" 
-                       class="btn btn-warning"> <i class="fas fa-edit mr-2"></i> Редактировать
+                       class="btn btn-warning mr-3 mb-2"> 
+                        <i class="fas fa-edit mr-2"></i> Редактировать
                     </a>
                 }
+
+                @* 3. КНОПКА УДАЛИТЬ *@
+                @if (isAdmin)
+                {
+                    <form asp-action="Delete" asp-route-id="@Model.Id" method="post" class="mr-3 mb-2"
+                          onsubmit="return confirm('ВНИМАНИЕ! Вы уверены?');">
+                        <button type="submit" class="btn btn-danger">
+                            🗑️ Удалить
+                        </button>
+                    </form>
+                }
+
+                @* ========================================================== *@
+                @* 4. КНОПКИ ЗАВЕДУЮЩЕГО КАФЕДРОЙ *@
+                @* Видны ТОЛЬКО если статус 'draft' или 'recheck' *@
+                @* ========================================================== *@
+                @if (showResolutionButtons)
+                {
+                    <div class="border-left pl-3 ml-3 d-flex align-items-center bg-light p-2 rounded">
+                        <span class="mr-2 font-weight-bold text-dark">Решение:</span>
+                        
+                        @* Кнопка ПРИНЯТЬ *@
+                        <form asp-action="ChangeStatus" method="post" class="mr-2">
+                            <input type="hidden" name="id" value="@Model.Id" />
+                            <input type="hidden" name="newStatus" value="approved" />
+                            <button type="submit" class="btn btn-success font-weight-bold">
+                                ✅ Утвердить
+                            </button>
+                        </form>
+
+                        @* Кнопка ОТКЛОНИТЬ *@
+                        <form asp-action="ChangeStatus" method="post">
+                            <input type="hidden" name="id" value="@Model.Id" />
+                            <input type="hidden" name="newStatus" value="rejected" />
+                            <button type="submit" class="btn btn-outline-danger">
+                                ❌ Отклонить
+                            </button>
+                        </form>
+                    </div>
+                }
+                @* ========================================================== *@
+
             </div>
-            </div>
+        </div>
 
         <div class="card-body-custom">
             <div class="row mb-4">
@@ -85,8 +155,8 @@
                             <input type="text" class="readonly-box" readonly value="@Model.Specialty?.Duration" />
                         </div>
                         <div class="info-item mt-3">
-                            <div class="info-label">Компетенции</div>
-                            <textarea class="readonly-box" readonly>@Model.Competencies</textarea>
+                            <div class="info-label">Квалификация</div>
+                            <input type="text" class="readonly-box" readonly value="@Model.Specialty?.Qualification" />
                         </div>
                     </div>
                 </div>
@@ -191,6 +261,11 @@
                 <div class="col-md-6 mb-4">
                     <label class="methodical-label">Цели и задачи</label>
                     <div class="readonly-box" style="white-space:pre-line;">@Model.Goals</div>
+                </div>
+
+                <div class="col-md-6 mb-4">
+                    <label class="methodical-label">Компетенции</label>
+                    <div class="readonly-box" style="white-space:pre-line;">@Model.Competencies</div>
                 </div>
 
                 <div class="col-md-6 mb-4">

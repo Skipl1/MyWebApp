@@ -701,10 +701,31 @@ a:hover {
 }
 
 .status-green {
-    background-color: #d4edda;
-    color: #155724;
+    background-color: #d4edda; /* Светло-зеленый фон */
+    color: #155724;            /* Темно-зеленый текст */
+    border: 1px solid #c3e6cb; /* Легкая обводка */
 }
 
+/* 2. СТИЛЬ ДЛЯ ПЕРЕПРОВЕРИТЬ (RECHECK) - Светлый оранжевый/желтый */
+.status-orange {
+    background-color: #fff3cd; /* Светло-желтый фон */
+    color: #856404;            /* Темно-желтый текст */
+    border: 1px solid #ffeeba; /* Легкая обводка */
+}
+
+/* 3. СТИЛЬ ДЛЯ ОТКЛОНЕНО (REJECTED) - Светлый красный */
+.status-red {
+    background-color: #f8d7da; /* Светло-красный (розовый) фон */
+    color: #721c24;            /* Темно-красный текст */
+    border: 1px solid #f5c6cb; /* Легкая обводка */
+}
+
+/* Дополнительно: Стиль для черновика, если вы его используете */
+.status-gray {
+    background-color: #e9ecef; /* Светло-серый фон */
+    color: #495057;            /* Темно-серый текст */
+    border: 1px solid #dae0e5; /* Легкая обводка */
+}
 .create-program-container {
         padding: 40px 15px;
         max-width: 1400px; /* Сделали еще шире, так как добавили колонку */

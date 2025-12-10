@@ -71,7 +71,7 @@
                                 <input type="text" id="durationField" class="readonly-box" readonly value="—" />
                             </div>
                             <div class="info-item mt-3">
-                                <div class="info-label">Компетенции</div>
+                                <div class="info-label">Квалификация</div>
                                 <textarea id="competenciesField" class="readonly-box" rows="4" readonly style="resize:none;">—</textarea>
                             </div>
                         </div>
@@ -121,6 +121,14 @@
                         </div>
                     </div>
                     
+                    <div class="col-md-6 mb-4">
+                        <div class="methodical-box">
+                            <label asp-for="Competencies" class="methodical-label">Компетенции</label>
+                            <textarea asp-for="Competencies" class="textarea-square" placeholder="Что должен знать и уметь студент..."></textarea>
+                            <span asp-validation-for="Competencies" class="text-danger"></span>
+                        </div>
+                    </div>
+
                     <div class="col-md-6 mb-4">
                         <div class="methodical-box">
                             <label asp-for="Requirements" class="methodical-label">Требования к уровню освоения</label>
