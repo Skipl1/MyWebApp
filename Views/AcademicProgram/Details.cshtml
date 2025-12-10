@@ -2,289 +2,250 @@
 
 @{
     ViewData["Title"] = "Детали программы";
-    
+   
+    // Переменные представления
     bool isAssignedTeacher = ViewBag.IsAssignedTeacher ?? false;
-    bool isAdmin = ViewBag.IsAdmin ?? false; // Или User.IsInRole("admin")
+    bool isAdmin = ViewBag.IsAdmin ?? false;
     bool canEdit = ViewBag.CanEdit ?? false;
     bool isHeadOfDepartment = ViewBag.IsHeadOfDepartment ?? false;
 
-    // --- ЛОГИКА ОТОБРАЖЕНИЯ КНОПОК РЕЗОЛЮЦИИ ---
-    // Кнопки видны, только если:
-    // 1. Пользователь - зав. кафедрой
-    // 2. Статус программы "draft" (черновик) ИЛИ "recheck" (на проверке)
-    bool showResolutionButtons = isHeadOfDepartment 
+    bool showResolutionButtons = isHeadOfDepartment
                                  && (Model.Status == "draft" || Model.Status == "recheck");
 }
 
 <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 
-<div class="container create-program-container">
+<div class="container program-container"> 
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    @* === 1. ЗАГОЛОВОК И СТАТУС === *@
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px;">
         <a asp-action="Index" class="back-button">
-            <i class="fas fa-arrow-left mr-2"></i> Назад к списку
+            <span class="back-icon">←</span> Назад к списку
         </a>
-
-        @* Отображение текущего статуса *@
-        <div>
-            Статус: 
-            @if(Model.Status == "approved") 
-            { 
-                <span class="badge badge-success" style="font-size: 1em; padding: 10px;">✅ Принято (Approved)</span> 
-            }
-            else if(Model.Status == "rejected") 
-            { 
-                <span class="badge badge-danger" style="font-size: 1em; padding: 10px;">❌ Отклонено (Rejected)</span> 
-            }
-            else if(Model.Status == "recheck") 
-            { 
-                <span class="badge badge-warning" style="font-size: 1em; padding: 10px;">⚠️ Требует проверки</span> 
-            }
-            else 
-            { 
-                <span class="badge badge-secondary" style="font-size: 1em; padding: 10px;">📝 Черновик (Draft)</span> 
-            }
-        </div>
     </div>
-
-    <div class="main-card">
-        <div style="text-align: center; margin-top: 20px;">
-            <h2>Учебная программа — Детали</h2>
+   
+    @* === 2. ОСНОВНАЯ КАРТОЧКА === *@
+    <div class="card-style">
+        <div style="text-align: center; margin-top: 15px; margin-bottom: 30px;">
+            <h2 style="color: var(--text-main); font-size: 1.8rem; margin-bottom: 15px;">Учебная программа — Детали</h2>
             
-            <div class="d-flex justify-content-center align-items-center mb-4 flex-wrap">
-                
-                @* 1. КНОПКА СКАЧАТЬ *@
-                <a asp-controller="AcademicProgram" 
-                   asp-action="Download" 
-                   asp-route-id="@Model.Id" 
-                   class="btn btn-primary mr-3 mb-2">
-                   ⬇️ Скачать PDF
+            @* КНОПКИ *@
+            <div style="display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 15px;">
+                <a asp-controller="AcademicProgram" asp-action="Download" asp-route-id="@Model.Id" class="btn" style="background-color: var(--accent-dark); color: white;">
+                    ⬇️ Скачать PDF
                 </a>
 
-                @* 2. КНОПКА РЕДАКТИРОВАТЬ *@
                 @if (canEdit)
                 {
-                    <a asp-controller="AcademicProgram" 
-                       asp-action="Edit" 
-                       asp-route-id="@Model.Id" 
-                       class="btn btn-warning mr-3 mb-2"> 
-                        <i class="fas fa-edit mr-2"></i> Редактировать
+                    <a asp-controller="AcademicProgram" asp-action="Edit" asp-route-id="@Model.Id" class="btn" style="background-color: var(--warning-color); color: var(--text-main);">
+                        Редактировать
                     </a>
                 }
 
-                @* 3. КНОПКА УДАЛИТЬ *@
                 @if (isAdmin)
                 {
-                    <form asp-action="Delete" asp-route-id="@Model.Id" method="post" class="mr-3 mb-2"
-                          onsubmit="return confirm('ВНИМАНИЕ! Вы уверены?');">
-                        <button type="submit" class="btn btn-danger">
-                            🗑️ Удалить
-                        </button>
+                    <form asp-action="Delete" asp-route-id="@Model.Id" method="post" style="margin: 0;" onsubmit="return confirm('ВНИМАНИЕ! Вы уверены?');">
+                        <button type="submit" class="btn" style="background-color: var(--danger-color); color: white;">Удалить</button>
                     </form>
                 }
 
-                @* ========================================================== *@
-                @* 4. КНОПКИ ЗАВЕДУЮЩЕГО КАФЕДРОЙ *@
-                @* Видны ТОЛЬКО если статус 'draft' или 'recheck' *@
-                @* ========================================================== *@
                 @if (showResolutionButtons)
+
                 {
-                    <div class="border-left pl-3 ml-3 d-flex align-items-center bg-light p-2 rounded">
-                        <span class="mr-2 font-weight-bold text-dark">Решение:</span>
-                        
-                        @* Кнопка ПРИНЯТЬ *@
-                        <form asp-action="ChangeStatus" method="post" class="mr-2">
-                            <input type="hidden" name="id" value="@Model.Id" />
-                            <input type="hidden" name="newStatus" value="approved" />
-                            <button type="submit" class="btn btn-success font-weight-bold">
-                                ✅ Утвердить
-                            </button>
-                        </form>
-
-                        @* Кнопка ОТКЛОНИТЬ *@
-                        <form asp-action="ChangeStatus" method="post">
-                            <input type="hidden" name="id" value="@Model.Id" />
-                            <input type="hidden" name="newStatus" value="rejected" />
-                            <button type="submit" class="btn btn-outline-danger">
-                                ❌ Отклонить
-                            </button>
-                        </form>
-                    </div>
+                  <div style="border-left: 3px solid var(--accent-color); padding-left: 15px; margin-left: 15px; display: flex; align-items: center; gap: 10px; background-color: var(--bg-element); padding: 10px; border-radius: var(--radius);">
+                    <span style="font-weight: 600; color: var(--text-main);">Решение:</span>
+                    
+                    @* Кнопка УТВЕРДИТЬ: Цвет текста изменен на ЧЕРНЫЙ *@
+                    <form asp-action="ChangeStatus" method="post" style="margin: 0;">
+                      <input type="hidden" name="id" value="@Model.Id" />
+                      <input type="hidden" name="newStatus" value="approved" />
+                      <button type="submit" class="btn" style="background-color: var(--success-color); color: var(--text-main);">Утвердить</button>
+                    </form>
+                    
+                    @* Кнопка ОТКЛОНИТЬ: Без изменений *@
+                    <form asp-action="ChangeStatus" method="post" style="margin: 0;">
+                      <input type="hidden" name="id" value="@Model.Id" />
+                      <input type="hidden" name="newStatus" value="rejected" />
+                      <button type="submit" class="btn" style="border: 1px solid var(--danger-color); background-color: transparent; color: var(--danger-color);">Отклонить</button>
+                    </form>
+                  </div>
                 }
-                @* ========================================================== *@
-
             </div>
         </div>
 
-        <div class="card-body-custom">
-            <div class="row mb-4">
-                <div class="col-lg-8">
-                    <div class="row">
-                        <div class="col-md-8">
-                            <label class="font-weight-bold">Название программы</label>
-                            <div class="readonly-box">@Model.Name</div>
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="font-weight-bold">Дисциплина</label>
-                            <div class="readonly-box">@Model.Discipline?.Name</div>
-                        </div>
+        @* === 3. ДАННЫЕ ПРОГРАММЫ === *@
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px; margin-bottom: 40px; padding-top: 20px;">
+            <div class="info-data-block" style="border: 1px solid #ccc; padding: 20px; border-radius: var(--radius); background-color: var(--bg-element);">
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 15px;">
+                    <div class="input-group-custom">
+                        <label class="info-label">Название программы</label>
+                        <div class="readonly-box">@Model.Name</div>
                     </div>
-
-                    <div class="row mt-2">
-                        <div class="col-md-8">
-                            <label class="font-weight-bold">Специальность</label>
-                            <div class="readonly-box">@Model.Specialty?.Name</div>
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="font-weight-bold">Год начала</label>
-                            <div class="readonly-box">@Model.StartYear</div>
-                        </div>
+                    <div class="input-group-custom">
+                        <label class="info-label">Дисциплина</label>
+                        <div class="readonly-box">@Model.Discipline?.Name</div>
                     </div>
                 </div>
-
-                <div class="col-lg-4">
-                    <div class="info-panel">
-                        <div class="info-item">
-                            <div class="info-label">Направление</div>
-                            <input type="text" class="readonly-box" readonly value="@Model.Specialty?.Direction" />
-                        </div>
-                        <div class="info-item mt-3">
-                            <div class="info-label">Срок обучения</div>
-                            <input type="text" class="readonly-box" readonly value="@Model.Specialty?.Duration" />
-                        </div>
-                        <div class="info-item mt-3">
-                            <div class="info-label">Квалификация</div>
-                            <input type="text" class="readonly-box" readonly value="@Model.Specialty?.Qualification" />
-                        </div>
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 15px; margin-top: 15px;">
+                    <div class="input-group-custom">
+                        <label class="info-label">Специальность</label>
+                        <div class="readonly-box">@Model.Specialty?.Name</div>
+                    </div>
+                    <div class="input-group-custom">
+                        <label class="info-label">Год начала</label>
+                        <div class="readonly-box">@Model.StartYear</div>
                     </div>
                 </div>
             </div>
 
-            <hr />
+            <div>
+                <div class="card-style" style="padding: 15px; background-color: var(--bg-element); border: 1px solid #ccc;">
+                    <div class="info-item">
+                        <div class="info-label" style="font-size: 0.9em; color: var(--text-muted);">Направление</div>
+                        <div class="readonly-box-mini">@Model.Specialty?.Direction</div>
+                    </div>
+                    <div class="info-item" style="margin-top: 10px;">
+                        <div class="info-label" style="font-size: 0.9em; color: var(--text-muted);">Срок обучения</div>
+                        <div class="readonly-box-mini">@Model.Specialty?.Duration</div>
+                    </div>
+                    <div class="info-item" style="margin-top: 10px;">
+                        <div class="info-label" style="font-size: 0.9em; color: var(--text-muted);">Квалификация</div>
+                        <div class="readonly-box-mini">@Model.Specialty?.Qualification</div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-            <h5 class="mt-4 mb-3" style="color: #333;">Преподавательский состав</h5>
+        <hr style="border-top: 1px solid #ccc; margin: 30px 0;" />
 
-            <table class="table table-bordered table-sm">
-                <thead style="background: #f8f9fa;">
+        @* === 4. ПРЕПОДАВАТЕЛЬСКИЙ СОСТАВ === *@
+        <h5 style="color: var(--text-main); margin-top: 40px; margin-bottom: 20px;">Преподавательский состав</h5>
+
+        @* ИСПОЛЬЗУЕМ НОВЫЙ КЛАСС table-soft-bordered *@
+        <table class="table-soft-bordered">
+            <thead>
+                <tr>
+                    <th style="width: 60%; text-align: left;">Преподаватель</th>
+                    <th style="width: 40%; text-align: left;">Тип участия</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var dt in Model.Discipline.DisciplineTeachers)
+                {
                     <tr>
-                        <th>Преподаватель</th>
-                        <th>Тип участия</th>
+                        <td>@dt.Teacher.Surname @dt.Teacher.Name @dt.Teacher.Patronymic</td>
+                        <td>
+                            <span style="background-color: var(--bg-element); border: 1px solid #ddd; padding: 4px 8px; border-radius: 4px;">
+                                @dt.ParticipationType
+                            </span>
+                        </td>
                     </tr>
-                </thead>
-                <tbody>
-                    @foreach (var dt in Model.Discipline.DisciplineTeachers)
-                    {
-                        <tr>
-                            <td>@dt.Teacher.Surname @dt.Teacher.Name @dt.Teacher.Patronymic</td>
-                            <td><span class="badge badge-light border p-2">@dt.ParticipationType</span></td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-
-            <hr class="my-5" />
-            <h4 style="color: var(--primary-color);">Учебный план по семестрам</h4>
-
-            <div id="semestersContainer">
-                @foreach (var wl in Model.WorkLoads.OrderBy(w => w.Semester))
-                {
-                    <div class="semester-card mb-4">
-                        <div class="semester-header-custom">
-                            <h5 class="text-primary font-weight-bold mb-0">
-                                Семестр @wl.Semester
-                            </h5>
-                        </div>
-                        <div class="workload-grid mt-3">
-                            <div class="workload-item">
-                                <label>Лекции</label>
-                                <div class="readonly-box">@wl.Lectures</div>
-                            </div>
-                            <div class="workload-item">
-                                <label>Лаб.</label>
-                                <div class="readonly-box">@wl.Labs</div>
-                            </div>
-                            <div class="workload-item">
-                                <label>Практ.</label>
-                                <div class="readonly-box">@wl.SelfStudy</div>
-                            </div>
-                            <div class="workload-item">
-                                <label>СРС</label>
-                                <div class="readonly-box">@wl.IntermediateAssessment</div>
-                            </div>
-                            <div class="workload-item">
-                                <label>Аттестация</label>
-                                <div class="readonly-box">@wl.AssessmentType</div>
-                            </div>
-                        </div>
-
-                        <div class="sections-wrapper mt-4">
-                            <h6 class="text-secondary">Разделы дисциплины:</h6>
-                            <table class="table table-bordered table-sm table-custom">
-                                <thead>
-                                    <tr>
-                                        <th style="width: 50px;">#</th>
-                                        <th style="width: 30%;">Название раздела</th>
-                                        <th style="width: 40%;">Краткое содержание</th>
-                                        <th>Лек.</th>
-                                        <th>Лаб.</th>
-                                        <th>Сем.</th>
-                                        <th>СРС</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var s in wl.Sections.OrderBy(s => s.Index))
-                                    {
-                                        <tr>
-                                            <td>@s.Index</td>
-                                            <td>@s.Name</td>
-                                            <td>@s.Description</td>
-                                            <td>@s.LectureHours</td>
-                                            <td>@s.LabHours</td>
-                                            <td>@s.SeminarHours</td>
-                                            <td>@s.SelfStudyHours</td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
                 }
-            </div>
+            </tbody>
+        </table>
 
-            <hr class="my-5" />
+        <hr style="border-top: 1px solid #ccc; margin: 40px 0;" />
 
-            <h4 style="color: var(--primary-color); margin-bottom: 20px;">Методические материалы</h4>
+        @* === 5. УЧЕБНЫЙ ПЛАН ПО СЕМЕСТРАМ === *@
+        <h4 style="color: var(--accent-dark); margin-bottom: 30px;">Учебный план по семестрам</h4>
 
-            <div class="row">
-                <div class="col-md-6 mb-4">
-                    <label class="methodical-label">Цели и задачи</label>
-                    <div class="readonly-box" style="white-space:pre-line;">@Model.Goals</div>
+        <div id="semestersContainer">
+            @foreach (var wl in Model.WorkLoads.OrderBy(w => w.Semester))
+            {
+                <div class="semester-card card-style" style="margin-bottom: 30px; padding: 20px; border: 1px solid #ddd;">
+                    <div class="semester-header-custom" style="border-bottom: 2px solid var(--accent-color); padding-bottom: 10px; margin-bottom: 20px;">
+                        <h5 style="color: var(--accent-dark); font-weight: 700; margin: 0;">
+                            Семестр @wl.Semester
+                        </h5>
+                    </div>
+                   
+                    @* --- ВОТ ТУТ ТЕПЕРЬ ТАБЛИЦА ВМЕСТО КАРТОЧЕК --- *@
+                    <div style="margin-bottom: 25px;">
+                        <table class="table-soft-bordered workload-table">
+                            <thead>
+                                <tr>
+                                    <th>Лекции</th>
+                                    <th>Лаб.</th>
+                                    <th>Практ.</th>
+                                    <th>СРС</th>
+                                    <th>Аттестация</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>@wl.Lectures</td>
+                                    <td>@wl.Labs</td>
+                                    <td>@wl.SelfStudy</td>
+                                    <td>@wl.IntermediateAssessment</td>
+                                    <td style="color: var(--accent-dark);">@wl.AssessmentType</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    @* ТАБЛИЦА РАЗДЕЛОВ *@
+                    <div style="margin-top: 10px;">
+                        <h6 style="color: var(--text-muted); margin-bottom: 10px;">Разделы дисциплины:</h6>
+                        
+                        <table class="table-soft-bordered">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50px;">#</th>
+                                    <th style="text-align: left;">Название раздела</th>
+                                    <th style="text-align: left;">Краткое содержание</th>
+                                    <th style="width: 50px;">Лек.</th>
+                                    <th style="width: 50px;">Лаб.</th>
+                                    <th style="width: 50px;">Сем.</th>
+                                    <th style="width: 50px;">СРС</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var s in wl.Sections.OrderBy(s => s.Index))
+                                {
+                                    <tr>
+                                        <td style="text-align: center;">@s.Index</td>
+                                        <td style="font-weight: 500;">@s.Name</td>
+                                        <td style="color: var(--text-muted); font-size: 0.9em;">@s.Description</td>
+                                        <td style="text-align: center;">@s.LectureHours</td>
+                                        <td style="text-align: center;">@s.LabHours</td>
+                                        <td style="text-align: center;">@s.SeminarHours</td>
+                                        <td style="text-align: center;">@s.SelfStudyHours</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-
-                <div class="col-md-6 mb-4">
-                    <label class="methodical-label">Компетенции</label>
-                    <div class="readonly-box" style="white-space:pre-line;">@Model.Competencies</div>
-                </div>
-
-                <div class="col-md-6 mb-4">
-                    <label class="methodical-label">Требования</label>
-                    <div class="readonly-box" style="white-space:pre-line;">@Model.Requirements</div>
-                </div>
-
-                <div class="col-md-6 mb-4">
-                    <label class="methodical-label">Место дисциплины</label>
-                    <div class="readonly-box" style="white-space:pre-line;">@Model.DisciplinePosition</div>
-                </div>
-
-                <div class="col-md-6 mb-4">
-                    <label class="methodical-label">Литература</label>
-                    <div class="readonly-box" style="white-space:pre-line;">@Model.Literature</div>
-                </div>
-            </div>
-
+            }
         </div>
-    </div>
 
+        <hr style="border-top: 1px solid #ccc; margin: 40px 0;" />
+
+        @* === 6. МЕТОДИЧЕСКИЕ МАТЕРИАЛЫ === *@
+        <h4 style="color: var(--accent-dark); margin-bottom: 30px;">Методические материалы</h4>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+            <div class="input-group-custom info-data-block" style="border: 1px solid #ccc; padding: 15px; border-radius: var(--radius);">
+                <label class="info-label methodical-label">Цели и задачи</label>
+                <div class="readonly-box" style="white-space:pre-line;">@Model.Goals</div>
+            </div>
+            <div class="input-group-custom info-data-block" style="border: 1px solid #ccc; padding: 15px; border-radius: var(--radius);">
+                <label class="info-label methodical-label">Компетенции</label>
+                <div class="readonly-box" style="white-space:pre-line;">@Model.Competencies</div>
+            </div>
+            <div class="input-group-custom info-data-block" style="border: 1px solid #ccc; padding: 15px; border-radius: var(--radius);">
+                <label class="info-label methodical-label">Требования</label>
+                <div class="readonly-box" style="white-space:pre-line;">@Model.Requirements</div>
+            </div>
+            <div class="input-group-custom info-data-block" style="border: 1px solid #ccc; padding: 15px; border-radius: var(--radius);">
+                <label class="info-label methodical-label">Место дисциплины</label>
+                <div class="readonly-box" style="white-space:pre-line;">@Model.DisciplinePosition</div>
+            </div>
+            <div class="input-group-custom info-data-block" style="grid-column: span 2; border: 1px solid #ccc; padding: 15px; border-radius: var(--radius);">
+                <label class="info-label methodical-label">Литература</label>
+                <div class="readonly-box" style="white-space:pre-line;">@Model.Literature</div>
+            </div>
+        </div>
+
+    </div>
 </div>

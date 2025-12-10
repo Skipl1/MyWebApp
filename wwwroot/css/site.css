@@ -1,76 +1,54 @@
 :root {
-    /* Основные цвета */
-    --primary: #2c5aa0;         /* Основной акцентный цвет (синий) */
-    --primary-dark: #1e4278;    /* Темный вариант основного цвета */
+    /* --- ЦВЕТОВАЯ ПАЛИТРА: СТРОГИЙ ЧЕРНЫЙ / МОНОХРОМ --- */
     
-    /* Цвета фона и текста */
-    --bg-body: #f0f2f5;         /* Цвет фона страницы (светло-серый) */
-    --bg-card: #ffffff;         /* Цвет фона карточек и блоков */
-    --bg-hover-light: #f6f8fa;  /* Цвет фона при наведении (очень светлый) */
-    --bg-accent-light: #eaf5ff; /* Светлый фон для акцентов (напр., hover в списках) */
+    /* Основной "строгий" цвет (Заголовки, бейджи, линии) */
+    --accent-dark: #343a40; 
     
-    --text: #2d3748;            /* Темный основной текст */
-    --text-secondary: #5a6a7a;  /* Второстепенный текст (заменил #666) */
-    --text-primary: var(--primary); /* Текст цветом акцента */
-    
-    /* Границы и разделители */
-    --border: #e2e8f0;          /* Основной цвет границы */
-    --border-dark: #d0d0d0;     /* Более темная граница */
-    --border-light: #eee;       /* Очень светлая граница */
+    /* Акцентный цвет для действий (Кнопки, ссылки, фокус) - Теперь темно-серый */
+    --primary: #343a40;
+    --primary-hover: #000000; /* При наведении - чисто черный */
 
-    /* Сообщения */
-    --alert-bg: #fff3cd;        /* Фон для предупреждения */
-    --alert-border: #ffeeba;    /* Граница для предупреждения */
-    --alert-text: #6c757d;      /* Текст для предупреждения */
+    /* Фоны */
+    --bg-body: #f8f9fa;       /* Очень светлый серый фон страницы */
+    --bg-card: #ffffff;       /* Чисто белый фон карточек/блоков */
+    --bg-element: #e9ecef;    /* Светло-серый фон для выделения (шапки таблиц) */
     
-    /* Шрифты */
-    --font-sans: "Segoe UI", system-ui, Roboto, "Helvetica Neue", Arial, sans-serif;
+    /* Текст */
+    --text-main: #212529;     /* Основной текст (практически черный) */
+    --text-label: #555555;    /* Подписи (label) */
+    --text-muted: #6c757d;    /* Второстепенный текст */
+    --text-on-dark: #ffffff; /* Белый текст на темном фоне */
+
+    /* Границы */
+    --border-light: #dee2e6;
+    --border-dashed: #ced4da;
+    --border-focus: var(--accent-dark); /* Обводка при фокусе - теперь темно-серая */
+
+    /* Тени и Скругления (Style DNA) */
+    --radius: 10px;
+    --shadow-sm: 0 2px 5px rgba(0,0,0,0.05);
+    --shadow-hover: 0 8px 15px rgba(0,0,0,0.15);
+    --transition: all 0.3s ease-in-out;
 }
+
+/* ---------------------------------------------------- */
+/* 1. БАЗОВЫЕ НАСТРОЙКИ */
+/* ---------------------------------------------------- */
 
 * {
     box-sizing: border-box;
 }
 
 body {
-    font-family: var(--font-sans);
+    font-family: "Segoe UI", system-ui, Roboto, "Helvetica Neue", Arial, sans-serif;
     background: var(--bg-body);
     margin: 0;
     padding: 0;
-    color: var(--text);
+    color: var(--text-main);
+    line-height: 1.6;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    line-height: 1.6;
-}
-
-/* ---------------------------------------------------- */
-/* 1. Общие элементы */
-/* ---------------------------------------------------- */
-
-.container {
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 1.5rem;
-}
-
-/* Заголовки */
-h1, h2, h3 {
-    margin-top: 1.5rem;
-    margin-bottom: 0.75rem;
-    font-weight: 600;
-    color: var(--text);
-    text-align: center;
-}
-
-h1 {
-    font-size: 2rem;
-    color: var(--primary-dark);
-}
-
-h2 {
-    font-size: 1.5rem;
-    color: var(--primary);
 }
 
 /* Ссылки */
@@ -80,826 +58,693 @@ a {
     transition: color 0.2s;
 }
 
-a:hover {
-    color: inherit;
-    text-decoration: none;
+a.text-link {
+    color: var(--primary); /* Теперь темно-серый */
+    font-weight: 500;
+}
+a.text-link:hover {
+    color: var(--primary-hover); /* Теперь черный */
+    text-decoration: underline;
 }
 
-/* Кнопки */
+/* Заголовки страниц */
+h1, h2, h3 {
+    color: var(--accent-dark);
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    font-weight: 700;
+}
+
+h1 { text-align: center; font-size: 2.2rem; }
+h2 { text-align: center; font-size: 1.8rem; }
+
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px 1.5rem;
+}
+
+/* ---------------------------------------------------- */
+/* 2. УНИВЕРСАЛЬНЫЙ СТИЛЬ КАРТОЧКИ ("THE STYLE") */
+/* ---------------------------------------------------- */
+/* Этот класс применяется как база для всех блоков */
+
+.card-style, 
+.menu-card, 
+.faculty-card, 
+.teacher-card, 
+.program-card,
+.direction-block,
+.main-card,
+.create-form-section,
+.semester-card {
+    background-color: var(--bg-card);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+    border: none;
+    position: relative;
+    overflow: hidden;
+    display: block;
+}
+
+/* Эффект наведения для интерактивных карточек */
+a.card-style:hover, 
+.menu-card:hover, 
+.faculty-card:hover, 
+.teacher-card:hover, 
+.program-card:hover,
+.direction-block:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-hover);
+    cursor: pointer;
+    /* Опционально: добавить рамку акцентного цвета при наведении */
+    border: 1px solid var(--accent-dark); 
+}
+
+/* Внутренние разделители в стиле "Program Card" */
+.card-header-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--accent-dark); /* Та самая толстая линия */
+    margin-bottom: 15px;
+}
+
+.card-dashed-line {
+    margin: 10px 0;
+    border-top: 1px dashed var(--border-dashed);
+}
+
+/* ---------------------------------------------------- */
+/* 3. КОМПОНЕНТЫ ИНТЕРФЕЙСА (Кнопки, Бейджи) */
+/* ---------------------------------------------------- */
+
+/* Кнопки (основная) */
 .btn {
     display: inline-block;
     padding: 0.6rem 1.2rem;
-    font-size: 1rem;
-    font-weight: 500;
-    border-radius: 5px;
-    background-color: var(--primary);
-    color: var(--bg-card); /* Белый текст */
+    font-size: 0.95rem;
+    font-weight: 600;
+    border-radius: 6px;
+    
+    /* ИЗМЕНЕНИЕ: Белый фон, Темный текст, Темная рамка */
+    background-color: var(--bg-card); /* Белый фон */
+    color: var(--primary); /* Темный текст */
+    border: 1px solid var(--primary); /* Темная рамка */
+    
     text-align: center;
-    text-decoration: none;
+    transition: all 0.2s;
     cursor: pointer;
-    border: 1px solid var(--primary);
-    transition: background-color 0.2s, border-color 0.2s;
 }
 
 .btn:hover {
-    background-color: var(--primary-dark);
-    border-color: var(--primary-dark);
+    /* ИЗМЕНЕНИЕ: При наведении - Темный фон, Белый текст */
+    background-color: var(--primary-hover); /* Черный фон */
+    border-color: var(--primary-hover);
+    color: var(--text-on-dark); /* Белый текст */
+    
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
 }
 
-/* ---------------------------------------------------- */
-/* 2. Главное меню (Index) */
-/* ---------------------------------------------------- */
-
-.welcome-container {
-    text-align: center;
-    padding: 50px 20px 20px 20px;
+.btn-secondary {
+    /* Сохраняем стиль второстепенной кнопки, чтобы она отличалась */
+    background-color: transparent;
+    color: var(--accent-dark);
+    border: 1px solid var(--border-light);
 }
-
-.username {
-    color: var(--text-primary); /* Используем основной цвет */
-    font-weight: bold;
+.btn-secondary:hover {
+    background-color: var(--bg-element);
+    color: #000;
 }
-
-.main-menu-center {
-    text-align: center;
-    padding: 40px 20px;
-}
-
-.main-menu-center h2 {
-    margin-bottom: 30px;
-    font-size: 28px;
-    color: var(--text);
-}
-
-/* Карточки меню */
-.menu-cards {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 20px;
-    margin-top: 2rem;
-}
-
-.menu-card {
-    background: var(--bg-card);
-    border-radius: 15px;
-    text-decoration: none;
-    color: inherit;
-    width: 220px;
-    padding: 30px 20px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    transition: transform 0.2s, box-shadow 0.2s;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-
-.menu-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-}
-
-.menu-card h3 {
-    margin: 0 0 10px 0;
-    font-size: 20px;
-    text-align: center;
-    color: var(--primary-dark); /* Немного темнее, чем основной текст */
-}
-
-.menu-card p {
-    font-size: 14px;
-    color: var(--text-secondary);
-    text-align: center;
-}
-
-/* ---------------------------------------------------- */
-/* 3. Список факультетов / Кафедр */
-/* ---------------------------------------------------- */
-
-.faculty-container h2.faculty-title {
-    margin-top: 20px !important;
-    margin-bottom: 20px !important;
-    font-size: 28px;
-    font-weight: 700;
-    color: var(--text);
-}
-
-.faculty-list {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    margin-top: 20px;
-    max-width: 500px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.faculty-card {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 15px 20px;
-    background: var(--bg-card); /* Светлый фон для карточек */
-    border-radius: 10px;
-    text-decoration: none;
-    color: var(--text);
-    font-size: 18px;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.08);
-    border: 1px solid var(--border);
-    transition: background 0.2s ease, transform 0.15s ease;
-}
-
-.faculty-card:hover {
-    background: var(--bg-hover-light);
-    transform: translateX(4px); 
-}
-
-.faculty-icon {
-    font-size: 26px;
-    color: var(--primary);
-}
-
-.faculty-name {
-    font-weight: 600;
-}
-
-.faculty-head {
-    font-size: 1.1rem;
-    font-weight: 500;
-    color: var(--text);
-    margin-top: 8px;
-}
-.faculty-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-/* ---------------------------------------------------- */
-/* 4. Кнопка "Назад" */
-/* ---------------------------------------------------- */
 
 .back-button {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: var(--bg-card);
-    padding: 10px 20px;
-    border-radius: 12px;
-    border: 2px solid var(--border);
-    text-decoration: none;
-    font-size: 17px;
-    color: var(--text);
+    color: var(--text-muted);
     font-weight: 600;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-    transition: all 0.25s ease;
+    margin-bottom: 20px;
+    padding: 8px 16px;
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    border: 1px solid var(--border-light); /* Добавили рамку */
 }
-
 .back-button:hover {
-    background: var(--bg-hover-light);
-    border-color: var(--border-dark);
-    transform: translateX(-5px);
-    box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+    color: var(--accent-dark);
+    background: #fff;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transform: translateX(-3px);
+    border-color: var(--accent-dark);
 }
 
-.back-icon {
-    font-size: 20px;
+/* Бейджи (Год, Статус) */
+.badge-dark {
+    background-color: var(--accent-dark); /* Темно-серый */
+    color: var(--text-on-dark);
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.85em;
+    font-weight: bold;
 }
 
-/* ---------------------------------------------------- */
-/* 5. Страница Кафедры (department-page) */
-/* ---------------------------------------------------- */
-
-.department-page .faculty-list {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    margin-top: 30px;
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.department-page .teacher-card {
-    background-color: var(--bg-card);
+.status-indicator {
+    padding: 4px 12px;
     border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.department-page .teacher-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
-}
-
-.department-page .teacher-info {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.department-page .teacher-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.department-page .teacher-name {
+    font-size: 0.85em;
     font-weight: 600;
-    font-size: 18px;
-    color: var(--primary-dark);
+    text-transform: capitalize;
 }
+/* Статус цвета (оставлены, так как они нужны для смысла) */
+.status-green { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+.status-orange { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+.status-red { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+.status-gray { background-color: var(--bg-element); color: #495057; border: 1px solid var(--border-light); }
 
-.department-page .discipline-list {
-    list-style: none;
-    padding-left: 0;
-    margin: 0;
-}
+/* ---------------------------------------------------- */
+/* 4. ГЛАВНОЕ МЕНЮ (Index) */
+/* ---------------------------------------------------- */
 
-.department-page .discipline-item {
+.menu-cards {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
+    justify-content: center;
     flex-wrap: wrap;
-    border-bottom: 1px dashed var(--border-light);
-    padding-bottom: 5px;
-}
-.department-page .discipline-item:last-child {
-    border-bottom: none;
+    gap: 25px;
+    margin-top: 2rem;
 }
 
-.department-page .discipline-item button {
-    margin-left: 10px;
-}
-
-.department-page .add-discipline-form {
-    margin-top: 10px;
+.menu-card {
+    width: 240px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
-}
-
-.department-page .add-discipline-form select,
-.department-page .add-discipline-form input {
-    padding: 6px 10px;
-    border-radius: 6px;
-    border: 1px solid var(--border-dark);
-    font-size: 14px;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-.department-page .add-discipline-form button {
-    width: 150px;
-    align-self: flex-start;
-}
-
-/* ---------------------------------------------------- */
-/* 6. Страница Специальностей (specialty-container) */
-/* ---------------------------------------------------- */
-
-.specialty-container {
-    max-width: 900px;
-    margin: 40px auto;
-    padding: 20px;
-    background-color: var(--bg-card); 
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    font-family: var(--font-sans);
-}
-
-/* Заголовок страницы */
-.specialty-container h1 {
-    font-size: 2.2em;
-    color: var(--primary-dark);
-    margin-bottom: 30px;
-    border-bottom: 3px solid var(--primary); /* Акцентный цвет */
-    padding-bottom: 10px;
-}
-
-/* Блок направления */
-.direction-block {
-    margin-bottom: 30px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    overflow: hidden;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.direction-block:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
-}
-
-/* Заголовок направления */
-.direction-header {
-    background-color: var(--primary); 
-    color: var(--bg-card); /* Белый текст */
-    padding: 15px 20px;
-    font-size: 1.4em;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-}
-
-/* Список специальностей */
-.specialty-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    background-color: var(--bg-card);
-}
-
-/* Элемент списка специальностей */
-.specialty-item {
-    border-bottom: 1px solid var(--border-light);
-    transition: background-color 0.2s;
-}
-
-.specialty-item:last-child {
-    border-bottom: none;
-}
-
-.specialty-item:hover {
-    background-color: var(--bg-accent-light); 
-}
-
-/* Ссылка на специальность */
-.specialty-link {
-    display: block;
-    padding: 12px 25px;
-    text-decoration: none;
-    color: var(--text);
-    font-size: 1.1em;
-    transition: color 0.2s;
-}
-
-.specialty-link:hover {
-    color: var(--primary-dark); 
-    font-weight: 500;
-}
-
-/* Стиль для сообщения об отсутствии данных */
-.no-data-message {
+    align-items: center;
+    justify-content: center;
     text-align: center;
-    padding: 40px;
-    font-size: 1.2em;
-    color: var(--alert-text);
-    background-color: var(--alert-bg);
-    border: 1px solid var(--alert-border);
-    border-radius: 8px;
+    padding: 40px 20px;
+}
+
+.menu-card h3 {
+    margin: 0 0 10px 0;
+    font-size: 1.25rem;
+    color: var(--accent-dark);
+}
+
+.menu-card p {
+    color: var(--text-label);
+    font-size: 0.9rem;
+    margin: 0;
 }
 
 /* ---------------------------------------------------- */
-/* 7. Анимации и Адаптивность */
+/* 5. СПИСКИ (Факультеты, Кафедры) */
 /* ---------------------------------------------------- */
 
-.hidden-form {
-    display: none;
-    animation: slideDown 0.25s ease;
+.faculty-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-width: 700px;
+    margin: 20px auto;
 }
 
-@keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-8px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+.faculty-card {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 25px;
 }
 
-@media (max-width: 600px) {
-    .container {
-        padding: 0 1rem;
-    }
-
-    .menu-cards {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .menu-card {
-        width: 100%;
-    }
-
-    .department-page .faculty-list {
-        max-width: 100%;
-        padding: 0 10px;
-    }
-
-    .department-page .discipline-item {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .department-page .add-discipline-form button {
-        width: 100%;
-    }
+.faculty-icon {
+    font-size: 32px;
+    color: var(--accent-dark); /* Темный акцент */
 }
 
-/* --- Стили для формы добавления на странице Index --- */
+.faculty-content {
+    flex-grow: 1;
+}
+
+.faculty-name {
+    display: block;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 5px;
+}
+
+.faculty-head {
+    font-size: 0.95rem;
+    color: var(--text-label);
+}
+
+/* ---------------------------------------------------- */
+/* 6. СТРАНИЦА КАФЕДРЫ (Преподаватели, Дисциплины) */
+/* ---------------------------------------------------- */
+
+/* Стилизация формы добавления как "Карточки" */
 .create-form-section {
-    margin-bottom: 30px;
-    padding: 15px;
-    /* УДАЛЕНА РАМКА: border: 1px solid #333333; */
-    border-radius: 8px;
-    background-color: #f1f1f1;
-    /* Добавлена легкая тень для отделения от фона */
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); 
+    max-width: 800px;
+    margin: 0 auto 30px auto;
 }
 
 .create-form-section h4 {
     margin-top: 0;
-    color: #222222;
-}
-
-.form-add-discipline {
-    display: flex;
-    flex-direction: column;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--accent-dark);
+    font-size: 1.2rem;
+    color: var(--accent-dark);
 }
 
 .input-group {
     display: flex;
     gap: 10px;
-    margin-top: 10px;
+    margin-top: 15px;
 }
 
-.form-control {
-    flex-grow: 1;
-    padding: 10px;
-    border: 1px solid #cccccc; /* Оставил очень светлую рамку для самого поля ввода, чтобы его было видно */
-    border-radius: 4px;
-    color: #000000;
+.form-control, 
+.table-input,
+.department-page select, 
+.department-page input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    color: var(--text-main);
+    background-color: #fff;
+    transition: border-color 0.15s;
 }
 
-.add-button {
-    background-color: #343a40;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: bold;
+.form-control:focus,
+.table-input:focus {
+    border-color: var(--accent-dark);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(52, 58, 64, 0.1);
 }
 
-.text-danger {
-    color: #dc3545;
-    font-size: 0.9em;
-    margin-top: 5px;
-    display: block;
-}
-
-.separator {
-    margin-top: 30px;
-    margin-bottom: 30px;
-    border: 0;
-    border-top: 1px solid #dddddd; /* Очень светлый разделитель */
-}
-
-/* --- Стили для списка дисциплин --- */
+/* Список дисциплин */
 .discipline-list {
-    display: flex;
-    flex-direction: column; 
-    gap: 15px; 
+    gap: 15px;
 }
+
 .discipline-item {
-    background: #ffffff;
-    /* УДАЛЕНА РАМКА: border: 1px solid #777; */
-    border-radius: 8px;
-    padding: 15px;
+    background: #fff;
+    border-radius: var(--radius);
+    padding: 15px 20px;
+    box-shadow: var(--shadow-sm);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    /* Легкая тень, заменяющая рамку */
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); 
-    transition: all 0.3s ease-in-out; 
+    transition: var(--transition);
 }
-
-/* --- ИНТЕРАКТИВНЫЙ ЭФФЕКТ HOVER --- */
 .discipline-item:hover {
-    transform: translateY(-2px); 
-    /* Тень при наведении, чтобы эффект "подъема" был виден */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); 
-    cursor: pointer;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
 }
 
-.discipline-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-.discipline-icon {
-    font-size: 1.5em;
-    color: #000000;
-}
 .discipline-name {
-    font-size: 1.1em;
-    font-weight: bold;
-    color: #000000;
+    font-weight: 700;
+    color: var(--text-main);
 }
 
-/*Нравится стиль*/
-.program-card {
+/* Карточки учителей */
+.department-page .teacher-card {
+    display: flex;
+    flex-direction: column;
+}
+.department-page .teacher-name {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-main);
+    border-bottom: 1px dashed var(--border-dashed);
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+}
+
+/* ---------------------------------------------------- */
+/* 7. СПЕЦИАЛЬНОСТИ (Direction / Specialty) */
+/* ---------------------------------------------------- */
+
+.specialty-container {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.direction-block {
+    padding: 0;
+    margin-bottom: 30px;
+}
+
+.direction-header {
+    background-color: var(--accent-dark); /* Темный фон заголовка */
+    color: var(--text-on-dark);
+    padding: 15px 25px;
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.specialty-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.specialty-item {
+    border-bottom: 1px dashed var(--border-dashed);
+}
+.specialty-item:last-child { border-bottom: none; }
+
+.specialty-link {
     display: block;
-    background-color: #fff;
-    border-radius: 10px;
-    padding: 20px;
+    padding: 15px 25px;
+    font-weight: 500;
+    color: var(--text-main);
+}
+.specialty-link:hover {
+    background-color: var(--bg-element);
+    padding-left: 30px;
+    color: var(--primary); /* Темно-серый при наведении */
+}
+
+/* ---------------------------------------------------- */
+/* 8. ПРОГРАММЫ ОБУЧЕНИЯ (Стиль Program Card) */
+/* ---------------------------------------------------- */
+
+.program-card {
+    margin-bottom: 20px;
     text-decoration: none;
     color: inherit;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    transition: all 0.3s ease-in-out;
-    position: relative;
-    overflow: hidden;
 }
 
-/* Эффект при наведении */
-.program-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 15px rgba(0,0,0,0.15);
-}
-
-/* --- НОВЫЕ СТИЛИ ДЛЯ ЗАГОЛОВКА ДИСЦИПЛИНЫ --- */
+/* Заголовок дисциплины */
 .program-discipline-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding-bottom: 10px;
-    border-bottom: 2px solid #343a40; /* Толстая черная линия */
+    border-bottom: 2px solid var(--accent-dark); 
     margin-bottom: 15px;
 }
 
 .program-discipline-name {
     margin: 0;
-    font-size: 1.5em; /* Делаем название дисциплины самым крупным */
-    color: #000;
+    font-size: 1.4rem;
+    color: var(--text-main);
     font-weight: 700;
 }
 
-.program-year-badge {
-    background-color: #343a40;
-    color: #fff;
-    padding: 4px 10px;
-    border-radius: 4px;
-    font-size: 0.9em;
-    font-weight: bold;
-}
-
-/* Тело: Специальность и Направление */
-.program-body {
-    margin-bottom: 15px;
-}
+/* Инфо блок (Body) */
+.program-body { margin-bottom: 15px; }
 
 .program-specialty-info {
-    margin: 5px 0;
-    font-size: 1em;
+    margin: 6px 0;
+    font-size: 0.95rem;
+    display: flex;
 }
 
 .program-specialty-info .label {
-    font-weight: 500;
-    color: #555; /* Подписи серым */
-    min-width: 100px; /* Выравниваем подписи */
-    display: inline-block;
+    font-weight: 600;
+    color: var(--text-label);
+    width: 140px;
+    flex-shrink: 0;
 }
 
 .program-specialty-info .value {
-    font-weight: bold;
-    color: #222;
+    font-weight: 600;
+    color: var(--text-main);
 }
 
 .program-name-value {
-    margin-top: 10px;
+    margin-top: 12px;
     padding-top: 10px;
-    border-top: 1px dashed #ddd;
+    border-top: 1px dashed var(--border-dashed);
     font-style: italic;
-    color: #777;
-    font-size: 0.95em;
+    color: var(--text-muted);
+    font-size: 0.9em;
 }
 
-/* Подвал: Детали (без изменений, но для полноты) */
+/* Подвал */
 .program-footer {
     display: flex;
-    gap: 20px;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-light);
     font-size: 0.9em;
-    color: #333;
-    padding-top: 10px;
-    border-top: 1px solid #eee;
+    color: var(--text-muted);
 }
 
-.status-indicator {
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-size: 0.85em;
-    text-transform: capitalize;
-    background-color: #e9ecef;
-    color: #333;
-}
+/* ---------------------------------------------------- */
+/* 9. ФОРМА СОЗДАНИЯ ПРОГРАММЫ (Сложная таблица) */
+/* ---------------------------------------------------- */
 
-.status-green {
-    background-color: #d4edda; /* Светло-зеленый фон */
-    color: #155724;            /* Темно-зеленый текст */
-    border: 1px solid #c3e6cb; /* Легкая обводка */
-}
-
-/* 2. СТИЛЬ ДЛЯ ПЕРЕПРОВЕРИТЬ (RECHECK) - Светлый оранжевый/желтый */
-.status-orange {
-    background-color: #fff3cd; /* Светло-желтый фон */
-    color: #856404;            /* Темно-желтый текст */
-    border: 1px solid #ffeeba; /* Легкая обводка */
-}
-
-/* 3. СТИЛЬ ДЛЯ ОТКЛОНЕНО (REJECTED) - Светлый красный */
-.status-red {
-    background-color: #f8d7da; /* Светло-красный (розовый) фон */
-    color: #721c24;            /* Темно-красный текст */
-    border: 1px solid #f5c6cb; /* Легкая обводка */
-}
-
-/* Дополнительно: Стиль для черновика, если вы его используете */
-.status-gray {
-    background-color: #e9ecef; /* Светло-серый фон */
-    color: #495057;            /* Темно-серый текст */
-    border: 1px solid #dae0e5; /* Легкая обводка */
-}
 .create-program-container {
-        padding: 40px 15px;
-        max-width: 1400px; /* Сделали еще шире, так как добавили колонку */
-    }
+    padding: 20px 0;
+}
 
-    .main-card {
-        background: #fff;
-        border-radius: var(--border-radius);
-        box-shadow: var(--card-shadow);
-        border: none;
-        margin-top: 20px;
-        overflow: hidden;
-    }
+.main-card {
+    padding: 0;
+}
 
-    .main-card-header {
-        background-color: #fff;
-        padding: 20px 30px;
-        border-bottom: 1px solid #eee;
-        border-left: 6px solid var(--primary-color);
-    }
+.main-card-header {
+    background-color: #fff;
+    padding: 20px 30px;
+    border-bottom: 2px solid var(--accent-dark);
+}
 
-    .main-card-header h2 {
-        margin: 0;
-        color: var(--primary-color);
-        font-weight: 700;
-        font-size: 1.6rem;
-    }
+.main-card-header h2 {
+    margin: 0;
+    color: var(--accent-dark);
+    font-size: 1.5rem;
+    text-align: left;
+}
 
-    .card-body-custom {
-        padding: 30px;
-    }
+.card-body-custom {
+    padding: 30px;
+}
 
-    /* Инфо-панель (без заголовка) */
-    .info-panel {
-        background-color: #eef5fa;
-        border: 1px solid #dbe7f3;
-        border-radius: 8px;
-        padding: 15px;
-        height: 100%; /* Чтобы растягивалось по высоте */
-    }
-    
-    .info-item { margin-bottom: 8px; }
-    .info-label {
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        color: #6c757d;
-        font-weight: 700;
-    }
-    .readonly-box {
-        background: transparent;
-        border: none;
-        padding: 0;
-        font-weight: 600;
-        color: #333;
-        width: 100%;
-        outline: none;
-    }
+/* Info Panel (ReadOnly) */
+.info-panel {
+    background-color: var(--bg-element);
+    border: 1px dashed var(--border-dashed);
+    border-radius: 8px;
+    padding: 20px;
+    height: 100%;
+}
+.info-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: var(--text-label);
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    display: block;
+    margin-bottom: 4px;
+}
+.readonly-box {
+    background: transparent;
+    border: none;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-main);
+    width: 100%;
+    outline: none;
+    padding: 0;
+    margin-bottom: 15px;
+}
 
-    /* Семестры */
-    .semester-card {
-        border: 1px solid #dee2e6;
-        border-radius: 8px;
-        margin-bottom: 25px;
-        background: #fff;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.02);
-    }
-    
-    .semester-header-custom {
-        background: #f8f9fa;
-        padding: 10px 20px;
-        border-bottom: 1px solid #dee2e6;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
+/* Семестры */
+.semester-card {
+    padding: 0;
+    margin-bottom: 30px;
+    border: 1px solid var(--border-light);
+}
 
-    .workload-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-        gap: 15px;
-        padding: 15px;
-        background: #fff;
-        border-bottom: 1px solid #eee;
-    }
+.semester-header-custom {
+    background: var(--bg-element);
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 700;
+    color: var(--accent-dark);
+}
 
-    .workload-item label {
-        font-size: 0.75rem;
-        color: #6c757d;
-        text-transform: uppercase;
-        display: block;
-        margin-bottom: 4px;
-    }
+/* Grid для нагрузки */
+.workload-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 20px;
+    padding: 20px;
+    border-bottom: 1px dashed var(--border-dashed);
+}
+.workload-item label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    font-weight: 700;
+    display: block;
+    margin-bottom: 6px;
+}
 
-    /* Таблица разделов */
-    .sections-wrapper {
-        padding: 15px;
-    }
-    .table-custom th {
-        background-color: #e9ecef;
-        color: #495057;
-        font-size: 0.8rem;
-        font-weight: 700;
-        text-align: center;
-        vertical-align: middle;
-    }
-    .table-custom td {
-        vertical-align: middle;
-    }
-    /* Для инпутов внутри таблицы */
-    .table-input {
-        border: 1px solid #ced4da;
-        border-radius: 4px;
-        padding: 4px 8px;
-        width: 100%;
-        font-size: 0.9rem;
-    }
-    .table-input:focus {
-        border-color: var(--accent-color);
-        outline: none;
-    }
+/* Таблицы */
+.table-custom {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+.table-custom th {
+    background-color: var(--bg-element);
+    color: var(--text-label);
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 10px;
+    border-bottom: 2px solid #dee2e6;
+}
+.table-custom td {
+    padding: 10px;
+    border-bottom: 1px solid var(--border-light);
+}
 
-    /* Текстовые области (квадратные поля) */
-    .methodical-box {
-        background: #fff;
-        border: 1px solid #ced4da;
-        border-radius: 6px;
-        padding: 15px;
-        height: 100%;
-        display: flex;
+/* Textarea boxes */
+.methodical-box {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+.methodical-label {
+    font-weight: 700;
+    color: var(--accent-dark);
+    margin-bottom: 10px;
+    display: block;
+}
+.textarea-square {
+    flex-grow: 1;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    padding: 15px;
+    width: 100%;
+    resize: vertical;
+    min-height: 150px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    transition: border-color 0.2s;
+}
+.textarea-square:focus {
+    border-color: var(--accent-dark);
+    outline: none;
+}
+
+/* Кнопка добавления семестра */
+/* !!! ЕДИНСТВЕННЫЙ ИСКЛЮЧЕНИЕ: Я ОСТАВИЛ ЗЕЛЕНЫЙ ДЛЯ КНОПКИ "ДОБАВИТЬ", 
+   ТАК КАК ОНА ОБОЗНАЧАЕТ ДЕЙСТВИЕ "ПЛЮС/УСПЕХ" И ЧЕРНЫЙ МОЖЕТ БЫТЬ НЕ ИНТУИТИВНЫМ */
+.btn-add-sem {
+    border: 2px dashed #28a745;
+    color: #28a745;
+    background: #f0fff4;
+    font-weight: 600;
+    padding: 15px;
+    width: 100%;
+    border-radius: var(--radius);
+    transition: 0.3s;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.btn-add-sem:hover {
+    background: #28a745;
+    color: white;
+    box-shadow: 0 5px 15px rgba(40, 167, 69, 0.2);
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .program-specialty-info {
         flex-direction: column;
     }
-    .methodical-label {
-        font-weight: 600;
-        color: #004d99;
-        margin-bottom: 10px;
-        display: block;
-    }
-    .textarea-square {
-        flex-grow: 1;
-        border: 1px solid #e2e6ea;
-        border-radius: 4px;
-        padding: 10px;
+    .program-specialty-info .label {
         width: 100%;
-        resize: vertical;
-        min-height: 150px; /* Фиксированная минимальная высота */
-        font-size: 0.95rem;
-        transition: border-color 0.2s;
+        margin-bottom: 2px;
     }
-    .textarea-square:focus {
-        border-color: var(--accent-color);
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
-    }
-
-    /* Кнопки */
-    .btn-add-sem {
-        border: 2px dashed #28a745;
-        color: #28a745;
-        background: #f0fff4;
-        font-weight: 600;
-        padding: 12px 20px;
-        width: 100%;
-        transition: 0.3s;
-    }
-    .btn-add-sem:hover {
-        background: #28a745;
-        color: white;
-    }
-    
-    .back-button {
-        text-decoration: none;
-        color: #6c757d;
-        display: inline-flex;
+    .menu-cards {
+        flex-direction: column;
         align-items: center;
-        font-weight: 500;
-        margin-bottom: 15px;
     }
+    .menu-card {
+        width: 100%;
+    }
+}
+
+.table-soft-bordered {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid #a0a0a0; /* Внешняя рамка (серый цвет, 1px) */
+    margin-bottom: 20px;
+    background-color: #fff;
+}
+
+.table-soft-bordered th, 
+.table-soft-bordered td {
+    border: 1px solid #a0a0a0 !important; /* Внутренняя сетка */
+    padding: 10px;
+    vertical-align: middle;
+}
+
+.table-soft-bordered thead th {
+    background-color: #f8f9fa; /* Светло-серый фон шапки */
+    border-bottom: 2px solid #a0a0a0 !important; /* Чуть более заметная линия под шапкой */
+    font-weight: 600;
+    color: #333;
+}
+
+/* Для маленькой таблицы нагрузки */
+.workload-table th {
+    text-align: center;
+    font-size: 0.9rem;
+    color: #555;
+}
+.workload-table td {
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.form-control-custom {
+border: 1px solid #ccc !important;
+padding: 0.5rem 0.75rem; 
+border-radius: var(--radius);
+transition: border-color 0.15s ease-in-out;
+background-color: white !important;
+}
+.form-control-custom:focus {
+border-color: #ccc; /* Убираем акцентный цвет при фокусе */
+box-shadow: none; /* Убираем тень при фокусе */
+outline: none; 
+}
+
+/* Стиль для textarea (Методические материалы) */
+.form-control-custom[rows] {
+min-height: 80px;
+}
+
+/* Скрытие таблицы преподавателей по умолчанию */
+#teachersTable {
+display: none;
+}
+
+/* НОВЫЙ СТИЛЬ: для нередактируемых информационных полей (Направление, Срок, Квалификация) */
+.readonly-info-display {
+width: 100%;
+border: none;
+background: transparent;
+font-weight: normal;
+color: var(--text-main);
+min-height: 25px; /* Минимальная высота для однострочных данных */
+font-size: 1.1em; /* Увеличение шрифта */
+padding-top: 5px;
+white-space: pre-wrap; /* Сохраняет переносы для квалификации */
+}

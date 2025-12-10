@@ -3,42 +3,58 @@
 @{
     ViewData["Title"] = "Список направлений и специальностей";
 }
-<link rel="stylesheet" href="~/css/site.css" />
-@* Добавляем кнопку "На Главную" *@
-<div class="container" style="padding-top: 20px;">
+
+<link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+<div class="container program-container">
+    
+    @* === КНОПКА НАЗАД === *@
     <a asp-controller="Home" asp-action="Index" class="back-button">
         <span class="back-icon">←</span> На Главный Экран
     </a>
-</div>
 
-<div class="specialty-container">
-    <h1 style="text-align: center;">📚 Список Направлений и Специальностей</h1>
+    @* === ЗАГОЛОВОК СТРАНИЦЫ === *@
+    <h2 class="program-page-title">Список Направлений и Специальностей</h2>
 
     @if (Model == null || !Model.Any())
     {
-        <p class="no-data-message">Направления не найдены.</p>
+        <div class="empty-message">
+            Направления не найдены.
+        </div>
     }
     else
     {
+        @* Проходимся по направлениям (Группам) *@
         @foreach (var group in Model)
         {
-            <div class="direction-block">
-                <div class="direction-header">
-                    Направление: **@group.DirectionName**
+            <div class="direction-section" style="margin-bottom: 30px;">
+                
+                @* === ЗАГОЛОВОК ГРУППЫ === *@
+                <div class="direction-header-styled" style="display: flex; align-items: center; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 1px solid #eee;">
+                    <span style="font-size: 1.3rem; margin-right: 10px;">📂</span>
+                    <h3 style="margin: 0; font-size: 1.2rem; color: #2c3e50; font-weight: 700;">
+                        @group.DirectionName
+                    </h3>
                 </div>
 
-                <ul class="specialty-list">
+                @* === СЕТКА КАРТОЧЕК (Делаем их уже, чтобы вместилось больше) === *@
+                <div class="program-list" style="grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px;">
                     @foreach (var specialty in group.Specialties)
                     {
-                        <li class="specialty-item">
-                            @* ИЗМЕНЕНИЕ ЗДЕСЬ: ИСПОЛЬЗУЕМ asp-route-specialtyId *@
-                            <a asp-controller="Curriculum" asp-action="Index" 
-                               asp-route-specialtyId="@specialty.Id" class="specialty-link">
-                                → @specialty.SpecialtyName
-                            </a>
-                        </li>
+
+                        <a asp-controller="Curriculum" asp-action="Index" 
+                           asp-route-specialtyId="@specialty.Id" 
+                           class="program-card" 
+                           style="padding: 15px; min-height: auto; justify-content: space-between;">
+                            
+                            <div class="program-discipline-header" style="margin-bottom: 0;">
+                                <h3 class="program-discipline-name" style="font-size: 1.0rem; line-height: 1.4; margin-bottom: 0;">
+                                    @specialty.SpecialtyName
+                                </h3>
+                            </div>
+                        </a>
                     }
-                </ul>
+                </div>
             </div>
         }
     }

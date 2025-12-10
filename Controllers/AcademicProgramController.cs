@@ -532,6 +532,18 @@ namespace MyWebApp.Controllers
             return RedirectToAction(nameof(Index)); 
         }
 
+        private static string GetStatusDisplayName(string status)
+        {
+            // Преобразование статуса из английского в русский
+            return status switch
+            {
+                "approved" => "Утверждена",
+                "rejected" => "Отклонена",
+                "recheck" => "На доработку",
+                "draft" => "Черновик",
+                _ => "Неизвестный статус"
+            };
+        }
 
         public async Task<IActionResult> Download(int id)
         {
@@ -601,10 +613,15 @@ namespace MyWebApp.Controllers
             AddSimpleCell(mainInfoTable, program.Specialty?.Name, fontNormal, 1);
             AddSimpleCell(mainInfoTable, "Квалификация", fontBold, 1);
             AddSimpleCell(mainInfoTable, program.Specialty?.Qualification, fontNormal, 1);
+            
 
             // Строка 4
             AddSimpleCell(mainInfoTable, "Год начала", fontBold, 1);
             AddSimpleCell(mainInfoTable, program.StartYear.ToString(), fontNormal, 1);
+
+            AddSimpleCell(mainInfoTable, "Статус", fontBold, 1);
+            string russianStatus = GetStatusDisplayName(program.Status);
+            AddSimpleCell(mainInfoTable, russianStatus, fontNormal, 1);
             // Заполняем пустые ячейки (span 2 колонки)
             AddSimpleCell(mainInfoTable, "", fontNormal, 2); 
 

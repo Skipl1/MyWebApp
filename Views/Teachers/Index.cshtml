@@ -2,7 +2,7 @@
 @using Microsoft.EntityFrameworkCore
 @inject MyWebApp.Data.ApplicationDbContext Context
 
-<link rel="stylesheet" href="~/css/site.css" />
+<link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 
 <div class="container department-page">
     
@@ -41,12 +41,12 @@
 
                     <div class="teacher-row">
                         <div class="teacher-name">
-                            👤 @teacher.Surname @teacher.Name @teacher.Patronymic
+                            @teacher.Surname @teacher.Name @teacher.Patronymic
                         </div>
                     </div>
 
                     <div>
-                        <strong>📚 Дисциплины:</strong>
+                        <strong>Дисциплины:</strong>
 
                         <ul class="discipline-list">
                             @foreach (var dt in teacher.DisciplineTeachers)

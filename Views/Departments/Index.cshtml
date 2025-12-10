@@ -1,5 +1,5 @@
 @model Faculty
-<link rel="stylesheet" href="~/css/site.css" />
+<link rel="stylesheet" href="~/css/site.css"  asp-append-version="true"  />
 
 <div class="container faculty-container">
     <a href="/Faculty" class="back-button">
@@ -16,12 +16,10 @@
             <div class="faculty-info">
 
                 <div class="faculty-row">
-                    <div class="faculty-icon">🏫</div>
                     <div class="faculty-name">@dep.Name</div>
                 </div>
 
                 <div class="faculty-row">
-                    <div class="faculty-icon">👤</div>
                     <div class="faculty-head">
                         Заведующий: @dep.Head?.Surname @dep.Head?.Name @dep.Head?.Patronymic
                     </div>

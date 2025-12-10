@@ -1,5 +1,5 @@
 @model IEnumerable<Faculty>
-<link rel="stylesheet" href="~/css/site.css" />
+<link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 
 <div class="container faculty-container">
     <a href="/Home/Index" class="back-button">
@@ -13,7 +13,6 @@
         @foreach (var faculty in Model)
         {
             <a class="faculty-card" href="/Departments?facultyId=@faculty.Id">
-                <div class="faculty-icon">🏛️</div>
                 <div class="faculty-name">@faculty.Name</div>
             </a>
         }
