@@ -158,36 +158,88 @@ namespace MyWebApp.Controllers
 
 
         // ---------------------------------------------------------------------------------
-        // --- 4. РЕДАКТИРОВАНИЕ (EDIT GET & POST) 🚀 ---
+        // --- 4. РЕДАКТИРОВАНИЕ (EDIT GET) 🚀 ---
         // ---------------------------------------------------------------------------------
-        
-        [Authorize(Roles = "admin")]
+        [HttpGet]
+        [Authorize(Roles = "admin, teacher")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
 
-            // Загружаем программу вместе с вложенными коллекциями для отображения
+            // Загружаем программу вместе с DisciplineTeachers для проверки прав
             var program = await _context.AcademicPrograms
                 .Include(ap => ap.WorkLoads)
                     .ThenInclude(wl => wl.Sections)
+                .Include(ap => ap.Discipline) // Включаем Discipline
+                    .ThenInclude(d => d.DisciplineTeachers) // Включаем DisciplineTeachers
                 .FirstOrDefaultAsync(ap => ap.Id == id);
 
             if (program == null) return NotFound();
+
+            // --- ПРОВЕРКА ПРАВ НА РЕДАКТИРОВАНИЕ ---
+            bool isAdmin = User.IsInRole("admin");
+            
+            // Получаем ID текущего пользователя
+            var currentUserIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            int currentUserId = 0;
+            bool isUserIdValid = int.TryParse(currentUserIdStr, out currentUserId);
+            
+            // Проверка назначенного преподавателя
+            bool isAssignedTeacher = false;
+            if (isUserIdValid && program.Discipline != null)
+            {
+                isAssignedTeacher = program.Discipline.DisciplineTeachers
+                    .Any(dt => dt.TeacherId == currentUserId);
+            }
+            
+            // Если пользователь не Админ И не Назначенный преподаватель, запрещаем доступ
+            if (!isAdmin && !isAssignedTeacher)
+            {
+                return Forbid(); 
+            }
+            // ---------------------------------------
 
             await PopulateDropDowns(program.SpecialtyId, program.DisciplineId);
 
             return View(program);
         }
-
+        
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        [Authorize(Roles = "admin")]
+        [Authorize(Roles = "admin, teacher")]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Name,SpecialtyId,DisciplineId,StartYear,Goals,Requirements,DisciplinePosition,Literature,Status,WorkLoads,Competencies")] AcademicProgram program)
         {
             if (id != program.Id) return NotFound();
 
+            // --- ПРОВЕРКА ПРАВ НА СОХРАНЕНИЕ ---
+            bool isAdmin = User.IsInRole("admin");
+            var currentUserIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            int currentUserId = 0;
+            bool isUserIdValid = int.TryParse(currentUserIdStr, out currentUserId);
+
+            // Загружаем DisciplineTeachers для проверки прав, но без отслеживания
+            var programForAuth = await _context.AcademicPrograms
+                .AsNoTracking()
+                .Include(ap => ap.Discipline)
+                    .ThenInclude(d => d.DisciplineTeachers)
+                .FirstOrDefaultAsync(ap => ap.Id == id);
+
+            if (programForAuth == null) return NotFound();
+
+            bool isAssignedTeacher = false;
+            if (isUserIdValid && programForAuth.Discipline != null)
+            {
+                isAssignedTeacher = programForAuth.Discipline.DisciplineTeachers
+                    .Any(dt => dt.TeacherId == currentUserId);
+            }
+
+            // Если пользователь не Админ И не Назначенный преподаватель, запрещаем сохранение
+            if (!isAdmin && !isAssignedTeacher)
+            {
+                return Forbid();
+            }
+            // ----------------------------------
+            
             // 1. ПОЛУЧАЕМ ТЕКУЩИЙ СТАТУС ИЗ БД (до любых изменений)
-            // Используем Select, чтобы загрузить только поле Status, это эффективно.
             var originalStatus = await _context.AcademicPrograms
                 .Where(p => p.Id == id)
                 .Select(p => p.Status)
@@ -197,21 +249,12 @@ namespace MyWebApp.Controllers
             ApplyDefaultStatusAndClearModelErrors(program);
 
             // 2. ЛОГИКА ИЗМЕНЕНИЯ СТАТУСА ПЕРЕД СОХРАНЕНИЕМ
-            
-            // Если программа уже была 'approved' И была отредактирована
+            // Если программа уже была 'approved' или 'rejected' И была отредактирована
             if ((originalStatus?.ToLower() == "approved" || originalStatus?.ToLower() == "rejected") && program.Status?.ToLower() != "recheck")
             {
                 // Принудительно устанавливаем статус "Перепроверить"
                 program.Status = "recheck";
             }
-            else
-            {
-                // Если программа была 'draft' или 'recheck', оставляем статус, который пришел из формы.
-                // Если при редактировании программы 'draft' не меняется статус, он остается 'draft'.
-                // Если при редактировании программы 'recheck' не меняется статус, он остается 'recheck'.
-                // Если статус не был 'approved', мы не вмешиваемся в логику.
-            }
-
 
             if (ModelState.IsValid)
             {
@@ -220,19 +263,15 @@ namespace MyWebApp.Controllers
                     // 3. Обработка вложенных коллекций (загружает и обновляет WorkLoads/Sections)
                     await UpdateNestedCollections(program);
                     
-                    // Ищем, есть ли этот AcademicProgram уже в памяти (в ChangeTracker)
                     var trackedProgram = _context.ChangeTracker.Entries<AcademicProgram>()
                         .FirstOrDefault(e => e.Entity.Id == program.Id)?.Entity;
 
                     if (trackedProgram != null)
                     {
-                        // Если сущность уже отслеживается, копируем в неё новые простые значения
-                        // (включая только что установленный статус 'recheck' или оригинальный статус).
                         _context.Entry(trackedProgram).CurrentValues.SetValues(program);
                     }
                     else
                     {
-                        // Если не отслеживается (страховка), обновляем целиком
                         _context.Update(program);
                     }
                     
@@ -241,7 +280,6 @@ namespace MyWebApp.Controllers
                 catch (Exception ex) 
                 {
                     ModelState.AddModelError("", "Ошибка при сохранении данных: " + ex.Message);
-                    // Если есть ошибка, перезагружаем списки перед возвратом View
                     await PopulateDropDowns(program.SpecialtyId, program.DisciplineId);
                     return View(program);
                 }
@@ -249,7 +287,6 @@ namespace MyWebApp.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // Если есть ошибки валидации, перезагружаем списки
             await PopulateDropDowns(program.SpecialtyId, program.DisciplineId);
             return View(program);
         }
