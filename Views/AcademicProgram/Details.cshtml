@@ -44,11 +44,12 @@
 
                 @if (isAdmin)
                 {
-                    <form asp-action="Delete" asp-route-id="@Model.Id" method="post" style="margin: 0;" onsubmit="return confirm('ВНИМАНИЕ! Вы уверены?');">
-                        <button type="submit" class="btn" style="background-color: var(--danger-color); color: white;">Удалить</button>
+                    <form asp-action="Delete" asp-route-id="@Model.Id" method="post">
+                        <button type="submit" class="btn" style="background-color: var(--warning-color); color: var(--text-main); height: 45px;">
+                            Удалить программу
+                        </button>
                     </form>
                 }
-
                 @if (showResolutionButtons)
 
                 {

@@ -1,114 +1,127 @@
 @model IEnumerable<MyWebApp.Models.Discipline>
-<link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 
 @{
-    // !!! ИЗМЕНЕНИЕ: Используем ViewBag.IsAdmin вместо ViewBag.CurrentUserRole !!!
-    var isAdmin = (bool)ViewBag.IsAdmin; 
+    ViewData["Title"] = "Список дисциплин";
     
-    // Переменная currentUserRole больше не нужна
-    // var currentUserRole = (string)ViewBag.CurrentUserRole; // УДАЛЕНО
-
+    // ЛОГИКА ОСТАЛАСЬ БЕЗ ИЗМЕНЕНИЙ
+    var isAdmin = (bool)ViewBag.IsAdmin; 
     var newDiscipline = (MyWebApp.Models.Discipline)ViewBag.NewDiscipline;
     var totalCount = Model.Count();
-    // Получаем ID, который нужно редактировать
     var editId = ViewBag.EditDisciplineId as int?;
 }
 
-<div class="container discipline-container">
-    
-    <a href="/" class="back-button">
-        <span class="back-icon">←</span> На главную
-    </a>
+<link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
 
-    <h2 class="discipline-title">📚 Список дисциплин (@totalCount)</h2>
+<div class="container program-container">
     
-    @* === БЛОК ДОБАВЛЕНИЯ ДИСЦИПЛИНЫ (ТОЛЬКО ДЛЯ АДМИНА) === *@
-    @if (isAdmin) // ЗАЩИТА АДМИНА
+    @* === 1. ВЕРХНЯЯ ЧАСТЬ (КНОПКА НАЗАД) === *@
+    <div style="margin-bottom: 20px;">
+        <a href="/" class="back-button" style="text-decoration: none; color: var(--accent-dark); font-weight: 500;">
+            <span class="back-icon" style="margin-right: 5px;">←</span> На главную
+        </a>
+    </div>
+
+    @* === 2. ЗАГОЛОВОК === *@
+    <div style="text-align: center; margin-bottom: 30px;">
+        <h2 style="color: var(--text-main); font-size: 1.8rem; margin-bottom: 5px;">Список дисциплин</h2>
+        <div class="text-muted" style="font-size: 0.9em;">Всего дисциплин: @totalCount</div>
+    </div>
+    
+    @* === 3. БЛОК ДОБАВЛЕНИЯ (ТОЛЬКО ДЛЯ АДМИНА) === *@
+    @if (isAdmin)
     {
-        <div class="create-form-section">
-            <h4>Добавить новую дисциплину</h4>
+        <div class="card-style" style="background-color: var(--bg-element); padding: 25px; border-radius: var(--radius); border: 1px solid #ccc; margin-bottom: 40px;">
+            <h5 style="color: var(--accent-dark); margin-bottom: 15px;"><i class="fas fa-plus-circle"></i> Добавить новую дисциплину</h5>
             
-            <form asp-action="Index" method="post" class="form-add-discipline">
-                
+            <form asp-action="Index" method="post">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-                <div class="input-group">
-                    <input type="text" asp-for="@newDiscipline.Name" class="form-control" placeholder="Название дисциплины (обязательно)" />
-                    <button type="submit" class="btn btn-success add-button">Добавить</button>
+                <div style="display: flex; gap: 15px; align-items: flex-start;">
+                    <div style="flex-grow: 1;">
+                        <input type="text" asp-for="@newDiscipline.Name" class="form-control-custom" placeholder="Введите название дисциплины..." style="background: white;" />
+                        <span class="text-danger small" style="display:block; margin-top: 5px;">@Html.ValidationMessageFor(m => newDiscipline.Name)</span>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="padding: 10px 25px; height: 42px;">
+                        Добавить
+                    </button>
                 </div>
-                
-                <span class="text-danger">@Html.ValidationMessageFor(m => newDiscipline.Name)</span>
             </form>
         </div>
-        
-        <hr class="separator" />
     }
     
-    @* === СПИСОК ДИСЦИПЛИН (С РЕДАКТИРОВАНИЕМ) === *@
-    <div class="discipline-list">
+    @* === 4. СПИСОК ДИСЦИПЛИН === *@
+    <div class="discipline-list-container">
         @if (Model.Any())
         {
-            @foreach (var discipline in Model)
-            {
-                // Проверяем, нужно ли отобразить форму редактирования (ТОЛЬКО ДЛЯ АДМИНА И СОВПАДАЮЩЕГО ID)
-                if (isAdmin && discipline.Id == editId) // ИСПОЛЬЗУЕМ isAdmin
+            <div style="display: grid; gap: 15px;">
+                @foreach (var discipline in Model)
                 {
-                    // --- ФОРМА РЕДАКТИРОВАНИЯ ---
-                    @* ... Внутри цикла foreach, блок if (isAdmin && discipline.Id == editId) ... *@
-
-                    <div class="discipline-item edit-mode">
-                        <form asp-action="EditConfirmed" asp-route-id="@discipline.Id" method="post" class="form-inline-edit">
-                            
-                            @* ЯВНО указываем name="Id", чтобы контроллер его увидел *@
-                            <input type="hidden" asp-for="@discipline.Id" name="Id" />
-                            
-                            @Html.AntiForgeryToken()
-                            
-                            <div class="discipline-info">
-                                <div class="discipline-row">
-                                    <div class="discipline-icon">📝</div> 
-                                    
-                                    @* ЯВНО указываем name="Name" *@
-                                    <input type="text" asp-for="@discipline.Name" name="Name" class="form-control edit-input" />
+                    // ПРОВЕРКА НА РЕДАКТИРОВАНИЕ
+                    if (isAdmin && discipline.Id == editId)
+                    {
+                        @* --- КАРТОЧКА В РЕЖИМЕ РЕДАКТИРОВАНИЯ --- *@
+                        <div class="card-style" style="border: 2px solid var(--primary-color); padding: 20px; border-radius: var(--radius); background-color: #fff;">
+                            <form asp-action="EditConfirmed" asp-route-id="@discipline.Id" method="post" style="display: flex; align-items: center; justify-content: space-between; gap: 20px;">
+                                
+                                <input type="hidden" asp-for="@discipline.Id" name="Id" />
+                                @Html.AntiForgeryToken()
+                                
+                                <div style="display: flex; align-items: center; gap: 15px; flex-grow: 1;">
+                                    <div style="color: var(--primary-color); font-size: 1.2em;">
+                                        <i class="fas fa-edit"></i>
+                                    </div>
+                                    <div style="flex-grow: 1;">
+                                        <input type="text" asp-for="@discipline.Name" name="Name" class="form-control-custom" style="width: 100%;" />
+                                        <span class="text-danger small">@Html.ValidationMessageFor(m => discipline.Name)</span>
+                                    </div>
                                 </div>
-                                @* Вывод ошибки *@
-                                <span class="text-danger">@Html.ValidationMessageFor(m => discipline.Name)</span>
-                            </div>
-                            
-                            <div class="admin-actions">
-                                <button type="submit" class="btn btn-sm btn-success">💾 Сохранить</button>
-                                <a asp-action="Index" class="btn btn-sm btn-secondary">Отмена</a>
-                            </div>
-                        </form>
-                    </div>
-                }
-                else
-                {
-                    // --- СТАНДАРТНАЯ КАРТОЧКА ---
-                    <div class="discipline-item">
+                                
+                                <div style="display: flex; gap: 10px;">
+                                    <button type="submit" class="btn btn-success btn-sm" style="padding: 8px 15px;">
+                                        <i class="fas fa-check"></i> Сохранить
+                                    </button>
+                                    <a asp-action="Index" class="btn btn-secondary btn-sm" style="padding: 8px 15px; background: #95a5a6; border: none;">
+                                        Отмена
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+                    }
+                    else
+                    {
+                        @* --- ОБЫЧНАЯ КАРТОЧКА (ПРОСМОТР) --- *@
+                        <div class="card-style discipline-card" style="border: 1px solid #eee; padding: 20px; border-radius: var(--radius); background-color: white; transition: box-shadow 0.2s;">
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                
+                                <div style="display: flex; align-items: center; gap: 15px;">
+                                    <div style="width: 40px; height: 40px; background-color: #f8f9fa; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--accent-dark);">
+                                        <i class="fas fa-book"></i>
+                                    </div>
+                                    <span style="font-size: 1.1rem; font-weight: 500; color: #333;">
+                                        @discipline.Name
+                                    </span>
+                                </div>
 
-                        <div class="discipline-info">
-                            <div class="discipline-row">
-                                <div class="discipline-icon">📑</div> 
-                                <div class="discipline-name">@discipline.Name</div>
+                                @if (isAdmin)
+                                {
+                                    <div>
+                                        <a asp-action="Index" asp-route-editId="@discipline.Id" class="btn" style="color: var(--accent-dark); border: 1px dashed #ccc; padding: 5px 15px; border-radius: 4px; background: transparent; font-size: 0.9em;">
+                                            <i class="fas fa-pen"></i> Редактировать
+                                        </a>
+                                    </div>
+                                }
                             </div>
                         </div>
-                        
-                        @if (isAdmin) // ИСПОЛЬЗУЕМ isAdmin
-                        {
-                            <div class="admin-actions">
-                                <a asp-action="Index" asp-route-editId="@discipline.Id" class="btn btn-sm btn-edit">🖊️ Редактировать</a>
-                            </div>
-                        }
-
-                    </div>
+                    }
                 }
-            }
+            </div>
         }
         else
         {
-            <div class="empty-message">
-                <p>Нет доступных дисциплин.</p>
+            <div class="text-center text-muted" style="padding: 50px; background: #f9f9f9; border-radius: var(--radius);">
+                <i class="fas fa-folder-open" style="font-size: 3em; margin-bottom: 15px; color: #ddd;"></i>
+                <p>Список дисциплин пуст.</p>
             </div>
         }
     </div>

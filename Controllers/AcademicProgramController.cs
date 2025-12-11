@@ -79,7 +79,7 @@ namespace MyWebApp.Controllers
 
             ViewBag.CanEdit = isAdmin || isAssignedTeacher;
             ViewBag.IsHeadOfDepartment = isHeadOfDepartment; // Передаем флаг в View
-
+            ViewBag.IsAdmin = isAdmin;
             return View(program);
         }
 

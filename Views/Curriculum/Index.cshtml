@@ -14,177 +14,178 @@
     var hasDisciplines = disciplinesBySemester.Any(); 
 }
 
-@* Подключаем ваши стили *@
+@* Подключаем стили и FontAwesome *@
 <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
 
 <div class="container program-container">
     
     @* === 1. КНОПКА НАЗАД === *@
-    <a asp-controller="Specialties" asp-action="Index" class="back-button">
-        <span class="back-icon">←</span> К специальностям
-    </a>
+    <div style="margin-bottom: 20px;">
+        <a asp-controller="Specialties" asp-action="Index" class="back-button" style="text-decoration: none; color: var(--accent-dark); font-weight: 500;">
+            <span class="back-icon" style="margin-right: 5px;">←</span> К специальностям
+        </a>
+    </div>
 
-    @* === 2. ЗАГОЛОВОК СТРАНИЦЫ === *@
-    <div style="text-align: center; margin-bottom: 30px;">
-        <h1 style="margin-bottom: 5px;">@Model.Specialty.Name</h1>
-        <p style="color: var(--text-muted); font-size: 1.1rem; font-weight: 500;">
-            Направление: <span style="color: var(--text-main);">@Model.Specialty.Direction</span>
-        </p>
+    @* === 2. ОБЩАЯ ВНЕШНЯЯ РАМКА === *@
+    <div class="card-style" style="border: 1px solid #ccc; padding: 30px; border-radius: var(--radius); background-color: white; min-height: 80vh;">
 
-        @* КНОПКА СКАЧАТЬ *@
-        @if (hasDisciplines)
-        {
-            <div style="margin-top: 20px;">
-                <a asp-action="Download" asp-route-specialtyId="@Model.Specialty.Id" class="btn">
-                    ⬇️ Скачать PDF
+        @* === ЗАГОЛОВОК СТРАНИЦЫ === *@
+        <div style="text-align: center; margin-bottom: 30px; border-bottom: 1px solid #eee; padding-bottom: 20px;">
+            <h1 style="margin-bottom: 10px; color: var(--text-main); font-size: 2rem;">@Model.Specialty.Name</h1>
+            <p style="color: var(--text-muted); font-size: 1.1rem; font-weight: 500; margin-bottom: 15px;">
+                Направление: <span style="color: var(--accent-dark); font-weight: 600;">@Model.Specialty.Direction</span>
+            </p>
+
+            @* КНОПКА СКАЧАТЬ *@
+            @if (hasDisciplines)
+            {
+                <a asp-action="Download" asp-route-specialtyId="@Model.Specialty.Id" class="btn" style="border: 1px solid #ccc; background-color: var(--bg-element); color: var(--text-main); padding: 8px 16px; border-radius: 4px;">
+                    <i class="fas fa-file-pdf" style="color: #e74c3c;"></i> Скачать PDF
                 </a>
+            }
+            else
+            {
+                <div class="empty-message" style="color: var(--text-muted); font-size: 0.9em;">
+                    <i class="fas fa-info-circle"></i> Для скачивания плана добавьте дисциплины.
+                </div>
+            }
+        </div>
+
+        @* === 3. ФОРМА ДОБАВЛЕНИЯ (ADMIN) === *@
+        @if (User.IsInRole("admin"))
+        {
+            <div style="margin-bottom: 40px; background-color: #fdfdfd; border: 1px dashed #ccc; border-radius: var(--radius); padding: 5px;">
+                <details style="border-radius: var(--radius); overflow: hidden;">
+                    <summary style="cursor: pointer; padding: 15px; background-color: transparent; color: var(--accent-dark); font-weight: 600; list-style: none; display: flex; align-items: center; justify-content: center;">
+                        <span><i class="fas fa-plus-circle"></i> Добавить дисциплину</span>
+                    </summary>
+                    
+                    <div style="padding: 20px; background-color: white; border-top: 1px dashed #eee;"> 
+                        <form asp-action="Add" asp-controller="Curriculum" method="post">
+                            <input type="hidden" name="SpecialtyId" value="@specialtyId" />
+
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                                @* Дисциплина *@
+                                <div>
+                                    <label class="info-label" style="font-size: 0.85em; color: var(--text-muted); margin-bottom: 5px; display: block;">Дисциплина</label>
+                                    <select name="DisciplineId" class="form-control-custom" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" required>
+                                        <option value="">-- Выберите --</option>
+                                        @foreach (var item in allDisciplines)
+                                        {
+                                            <option value="@item.Value">@item.Text</option>
+                                        }
+                                    </select>
+                                </div>
+
+                                @* Семестр *@
+                                <div>
+                                    <label class="info-label" style="font-size: 0.85em; color: var(--text-muted); margin-bottom: 5px; display: block;">Семестр</label>
+                                    <input name="Semester" type="number" min="1" max="12" class="form-control-custom" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" value="1" required />
+                                </div>
+
+                                @* Тип сдачи *@
+                                <div>
+                                    <label class="info-label" style="font-size: 0.85em; color: var(--text-muted); margin-bottom: 5px; display: block;">Тип сдачи</label>
+                                    <select name="CertificationType" class="form-control-custom" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" required>
+                                        @foreach (var item in allCertTypes)
+                                        {
+                                            <option value="@item.Value">@item.Text</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div style="margin-top: 20px; text-align: right;">
+                                <button type="submit" class="btn btn-primary" style="padding: 8px 20px; background-color: var(--accent-dark); color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                    Сохранить
+                                </button>
+                            </div>
+                            @Html.AntiForgeryToken()
+                        </form>
+                    </div>
+                </details>
+            </div>
+        }
+
+        @* === 4. СПИСОК СЕМЕСТРОВ И ДИСЦИПЛИН === *@
+        @if (!hasDisciplines)
+        {
+            <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+                В этом учебном плане пока нет дисциплин.
             </div>
         }
         else
         {
-             <div class="empty-message" style="text-align: center; color: var(--text-muted); padding: 10px 0;">
-                Для скачивания плана добавьте дисциплины.
-            </div>
+            @foreach (var group in disciplinesBySemester)
+            {
+                <div class="semester-section" style="margin-bottom: 40px;">
+                    
+                    @* Заголовок Семестра *@
+                    <div class="semester-header" style="display: flex; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #eee;">
+                        <span style="font-size: 1.2rem; margin-right: 12px; color: var(--accent-dark);">
+                            <i class="far fa-calendar-alt"></i>
+                        </span>
+                        <h3 style="margin: 0; font-size: 1.3rem; color: var(--accent-dark); font-weight: 700;">
+                            Семестр @group.Semester
+                        </h3>
+                    </div>
+
+                    @* СПИСОК (ВЕРТИКАЛЬНЫЙ) *@
+                    <div class="program-list" style="display: flex; flex-direction: column; gap: 10px;">
+                        @foreach (var discipline in (IEnumerable<dynamic>)group.Disciplines)
+                        {
+                            @* Карточка дисциплины - ШИРОКАЯ *@
+                            <div class="discipline-row" style="background-color: var(--bg-element); padding: 15px 20px; border-radius: var(--radius); border: 1px solid #ccc; display: flex; align-items: center; justify-content: space-between; transition: all 0.2s;">
+                                
+                                @* Левая часть: Название *@
+                                <div style="display: flex; align-items: center; gap: 15px;">
+                                    <div style="color: #ccc; font-size: 1.1rem;">
+                                        <i class="fas fa-book"></i>
+                                    </div>
+                                    <h3 style="font-size: 1.05rem; margin: 0; color: var(--text-main); font-weight: 600;">
+                                        @discipline.Name
+                                    </h3>
+                                </div>
+
+                                @* Правая часть: Мета-инфо и действия *@
+                                <div style="display: flex; align-items: center; gap: 20px;">
+                                    
+                                    @* Тип сдачи (Badge) *@
+                                    <span style="background-color: white; border: 1px solid #ddd; padding: 4px 10px; border-radius: 12px; font-size: 0.85rem; color: var(--text-muted); font-weight: 500;">
+                                        @discipline.CertificationType
+                                    </span>
+
+                                    @* Кнопка удаления (ADMIN) *@
+                                    @if (User.IsInRole("admin"))
+                                    {
+                                        <form asp-controller="Curriculum" asp-action="Delete" method="post" 
+                                              asp-route-curriculumId="@discipline.CurriculumId" 
+                                              asp-route-specialtyId="@Model.Specialty.Id"
+                                              style="margin: 0;">
+                                            <button type="submit" 
+                                                    style="border: none; 
+                                                    background: transparent; 
+                                                    color: #777; 
+                                                    cursor: pointer; 
+                                                    padding: 5px; 
+                                                    font-size: 1rem; 
+                                                    opacity: 0.7; 
+                                                    transition: color 0.2s, opacity 0.2s;"
+                                                    onclick="return confirm('Удалить @discipline.Name?')"
+                                                    title="Удалить"
+                                                    onmouseover="this.style.opacity=1"
+                                                    onmouseout="this.style.opacity=0.7">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
         }
     </div>
-
-    @* === 3. ФОРМА ДОБАВЛЕНИЯ (ADMIN) - РАСКРЫВАЮЩАЯСЯ, СТИЛИЗОВАННАЯ ПОД КНОПКУ === *@
-    @if (User.IsInRole("admin"))
-    {
-        @* Основной div для центрирования и отступа *@
-        <div style="margin-bottom: 40px; text-align: center;">
-            @* ИЗМЕНЕНИЕ: Убрали border, чтобы не конфликтовал с рамкой кнопки *@
-            <details style="display: inline-block; text-align: left; width: 100%; max-width: 800px; /* УБРАН: border: 1px solid var(--border-light); */ border-radius: var(--radius); overflow: hidden;">
-                
-                @* Заголовок, стилизованный под кнопку .btn *@
-                <summary class="btn" 
-                        style="cursor: pointer; 
-                                list-style: none; 
-                                padding: 0.6rem 1.2rem; 
-                                display: flex; 
-                                justify-content: center; 
-                                align-items: center; 
-                                width: 100%; 
-                                /* ДОБАВЛЕНО: Скругление углов для summary, чтобы закрытое состояние выглядело как целая кнопка */
-                                border-radius: var(--radius); 
-                                font-size: 0.95rem; 
-                                font-weight: 600;">
-                    <span>Добавить дисциплину</span>
-                </summary>
-                
-                @* Содержимое формы *@
-                <div style="padding: 20px; background-color: var(--bg-card); border-top: 1px solid var(--border-light);"> 
-                    @* ДОБАВЛЕНО: Линия разделения между кнопкой и формой, когда она открыта *@
-                    <form asp-action="Add" asp-controller="Curriculum" method="post">
-                        <input type="hidden" name="SpecialtyId" value="@specialtyId" />
-
-                        <div class="input-group" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-                            @* Дисциплина *@
-                            <div>
-                                <label class="info-label">Дисциплина</label>
-                                <select name="DisciplineId" class="form-control" required>
-                                    <option value="">-- Выберите --</option>
-                                    @foreach (var item in allDisciplines)
-                                    {
-                                        <option value="@item.Value">@item.Text</option>
-                                    }
-                                </select>
-                            </div>
-
-                            @* Семестр *@
-                            <div>
-                                <label class="info-label">Семестр</label>
-                                <input name="Semester" type="number" min="1" max="12" class="form-control" value="1" required />
-                            </div>
-
-                            @* Аттестация *@
-                            <div>
-                                <label class="info-label">Тип сдачи</label>
-                                <select name="CertificationType" class="form-control" required>
-                                    @foreach (var item in allCertTypes)
-                                    {
-                                        <option value="@item.Value">@item.Text</option>
-                                    }
-                                </select>
-                            </div>
-                        </div>
-
-                        @* Кнопка Сохранить *@
-                        <div style="margin-top: 20px; text-align: right;">
-                            <button type="submit" class="btn">
-                                Сохранить
-                            </button>
-                        </div>
-                        @Html.AntiForgeryToken()
-                    </form>
-                </div>
-            </details>
-        </div>
-    }
-
-    @* === 4. СПИСОК СЕМЕСТРОВ И ДИСЦИПЛИН (Плиточный стиль сохранен) === *@
-    @if (!hasDisciplines)
-    {
-        <div class="card-style" style="text-align: center; color: var(--text-muted);">
-            В этом учебном плане пока нет дисциплин.
-        </div>
-    }
-    else
-    {
-        @foreach (var group in disciplinesBySemester)
-        {
-            <div class="direction-section" style="margin-bottom: 40px;">
-                
-                @* Заголовок Семестра *@
-                <div class="direction-header-styled" style="display: flex; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid var(--accent-dark);">
-                    <span style="font-size: 1.5rem; margin-right: 10px; color: var(--accent-dark);">📅</span>
-                    <h3 style="margin: 0; font-size: 1.5rem; color: var(--accent-dark); font-weight: 700;">
-                        Семестр @group.Semester
-                    </h3>
-                </div>
-
-                @* СЕТКА ДИСЦИПЛИН (Program List) - КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: grid-auto-rows: 1fr *@
-                <div class="program-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; grid-auto-rows: 1fr;">
-                    @foreach (var discipline in (IEnumerable<dynamic>)group.Disciplines)
-                    {
-                        @* Карточка дисциплины (Program Card) - КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: height: 100% *@
-                        <div class="program-card card-style" style="padding: 15px; display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
-                            
-                            @* Название дисциплины *@
-                            <div style="margin-bottom: 10px;">
-                                <h3 class="program-discipline-name" style="font-size: 1.1rem; line-height: 1.4; margin: 0; color: var(--text-main);">
-                                    @discipline.Name
-                                </h3>
-                            </div>
-
-                            @* Футер: Аттестация и Удаление *@
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: auto; border-top: 1px dashed var(--border-dashed); padding-top: 8px;">
-                                
-                                @* Тип сдачи (Badge) *@
-                                <span class="badge-dark" style="background-color: var(--bg-element); color: var(--text-main); font-weight: 600; font-style: italic;">
-                                    @discipline.CertificationType
-                                </span>
-
-                                @* Кнопка удавления (ADMIN) *@
-                                @if (User.IsInRole("admin"))
-                                {
-                                    <form asp-controller="Curriculum" asp-action="Delete" method="post" 
-                                          asp-route-curriculumId="@discipline.CurriculumId" 
-                                          asp-route-specialtyId="@Model.Specialty.Id"
-                                          style="margin: 0;">
-                                        <button type="submit" class="btn-secondary" 
-                                                style="border: none; background: transparent; font-size: 1.2rem; color: #dc3545; cursor: pointer; padding: 0;" 
-                                                onclick="return confirm('Удалить @discipline.Name?')"
-                                                title="Удалить">
-                                            🗑️
-                                        </button>
-                                    </form>
-                                }
-                            </div>
-                        </div>
-                    }
-                </div>
-            </div>
-        }
-    }
 </div>

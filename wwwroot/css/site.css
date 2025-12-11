@@ -748,3 +748,25 @@ font-size: 1.1em; /* Увеличение шрифта */
 padding-top: 5px;
 white-space: pre-wrap; /* Сохраняет переносы для квалификации */
 }
+
+.discipline-card:hover {
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    border-color: #ddd !important;
+}
+
+.program-card-styled:hover > div {
+    border-color: var(--accent-dark) !important;
+    background-color: white !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.program-card-styled:hover .fa-chevron-right {
+    transform: translateX(3px);
+    transition: transform 0.2s;
+}
+
+.discipline-row:hover {
+    background-color: white !important;
+    border-color: var(--accent-dark) !important;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}

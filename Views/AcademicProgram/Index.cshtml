@@ -6,6 +6,8 @@
 }
 
 <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+@* Добавляем Font Awesome, чтобы использовать иконки *@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
 
 @* === ВСПОМОГАТЕЛЬНЫЙ МЕТОД ДЛЯ ПЕРЕВОДА СТАТУСОВ === *@
 @{
@@ -14,7 +16,7 @@
         return status?.ToLower() switch
         {
             "approved" => "Принято",
-            "rejected" => "Отклонено",      // <--- ДОБАВИЛИ ТЕКСТ
+            "rejected" => "Отклонено",     
             "draft" => "Не проверена",
             "recheck" => "Перепроверить",
             _ => status 
@@ -26,7 +28,7 @@
         return status?.ToLower() switch
         {
             "approved" => "status-green",
-            "rejected" => "status-red",     // <--- ДОБАВИЛИ КЛАСС КРАСНОГО ЦВЕТА
+            "rejected" => "status-red",     
             "recheck" => "status-orange",
             "draft" => "status-gray",
             _ => "status-gray"
@@ -40,7 +42,7 @@
         <span class="back-icon">←</span> На главную
     </a>
 
-    <h2 class="program-page-title">🎓 Учебные программы (@Model.Count())</h2>
+    <h2 class="program-page-title"> Учебные программы (@Model.Count())</h2>
 
     @* === БЛОК ДОБАВЛЕНИЯ ПРОГРАММЫ (ТОЛЬКО ДЛЯ АДМИНА) === *@
     @if (isAdmin)
@@ -83,10 +85,12 @@
                     @* === БЛОК 3: ПОДВАЛ С КАРТОЧКОЙ СТАТУСА === *@
                     <div class="program-footer">
                         <div class="footer-item">
-                            <span class="icon">⏳</span> @item.Specialty?.Duration лет
+                            @* ⏳ заменено на иконку часов *@
+                            <span class="icon"><i class="far fa-clock"></i></span> @item.Specialty?.Duration лет
                         </div>
                         <div class="footer-item">
-                            <span class="icon">🎓</span> @item.Specialty?.Qualification
+                            @* 🎓 заменено на иконку шапочки *@
+                            <span class="icon"><i class="fas fa-graduation-cap"></i></span> @item.Specialty?.Qualification
                         </div>
                         <div class="footer-item">
                             @* Вывод статуса с учетом стилей *@
