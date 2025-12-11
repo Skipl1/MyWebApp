@@ -2,42 +2,45 @@
 
 @{
     ViewData["Title"] = "Детали программы";
-   
-    // Переменные представления
+
+
     bool isAssignedTeacher = ViewBag.IsAssignedTeacher ?? false;
     bool isAdmin = ViewBag.IsAdmin ?? false;
     bool canEdit = ViewBag.CanEdit ?? false;
     bool isHeadOfDepartment = ViewBag.IsHeadOfDepartment ?? false;
 
     bool showResolutionButtons = isHeadOfDepartment
-                                 && (Model.Status == "draft" || Model.Status == "recheck");
+    && (Model.Status == "draft" || Model.Status == "recheck");
 }
 
 <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 
-<div class="container program-container"> 
+<div class="container program-container">
 
-    @* === 1. ЗАГОЛОВОК И СТАТУС === *@
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px;">
+
+    <div
+        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px;">
         <a asp-action="Index" class="back-button">
             <span class="back-icon">←</span> Назад к списку
         </a>
     </div>
-   
-    @* === 2. ОСНОВНАЯ КАРТОЧКА === *@
+
+
     <div class="card-style">
         <div style="text-align: center; margin-top: 15px; margin-bottom: 30px;">
             <h2 style="color: var(--text-main); font-size: 1.8rem; margin-bottom: 15px;">Учебная программа — Детали</h2>
-            
-            @* КНОПКИ *@
+
+
             <div style="display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 15px;">
-                <a asp-controller="AcademicProgram" asp-action="Download" asp-route-id="@Model.Id" class="btn" style="background-color: var(--accent-dark); color: white;">
+                <a asp-controller="AcademicProgram" asp-action="Download" asp-route-id="@Model.Id" class="btn"
+                    style="background-color: var(--accent-dark); color: white;">
                     ⬇️ Скачать PDF
                 </a>
 
                 @if (canEdit)
                 {
-                    <a asp-controller="AcademicProgram" asp-action="Edit" asp-route-id="@Model.Id" class="btn" style="background-color: var(--warning-color); color: var(--text-main);">
+                    <a asp-controller="AcademicProgram" asp-action="Edit" asp-route-id="@Model.Id" class="btn"
+                        style="background-color: var(--warning-color); color: var(--text-main);">
                         Редактировать
                     </a>
                 }
@@ -45,7 +48,8 @@
                 @if (isAdmin)
                 {
                     <form asp-action="Delete" asp-route-id="@Model.Id" method="post">
-                        <button type="submit" class="btn" style="background-color: var(--warning-color); color: var(--text-main); height: 45px;">
+                        <button type="submit" class="btn"
+                            style="background-color: var(--warning-color); color: var(--text-main); height: 45px;">
                             Удалить программу
                         </button>
                     </form>
@@ -53,30 +57,34 @@
                 @if (showResolutionButtons)
 
                 {
-                  <div style="border-left: 3px solid var(--accent-color); padding-left: 15px; margin-left: 15px; display: flex; align-items: center; gap: 10px; background-color: var(--bg-element); padding: 10px; border-radius: var(--radius);">
-                    <span style="font-weight: 600; color: var(--text-main);">Решение:</span>
-                    
-                    @* Кнопка УТВЕРДИТЬ: Цвет текста изменен на ЧЕРНЫЙ *@
-                    <form asp-action="ChangeStatus" method="post" style="margin: 0;">
-                      <input type="hidden" name="id" value="@Model.Id" />
-                      <input type="hidden" name="newStatus" value="approved" />
-                      <button type="submit" class="btn" style="background-color: var(--success-color); color: var(--text-main);">Утвердить</button>
-                    </form>
-                    
-                    @* Кнопка ОТКЛОНИТЬ: Без изменений *@
-                    <form asp-action="ChangeStatus" method="post" style="margin: 0;">
-                      <input type="hidden" name="id" value="@Model.Id" />
-                      <input type="hidden" name="newStatus" value="rejected" />
-                      <button type="submit" class="btn" style="border: 1px solid var(--danger-color); background-color: transparent; color: var(--danger-color);">Отклонить</button>
-                    </form>
-                  </div>
+                    <div
+                        style="border-left: 3px solid var(--accent-color); padding-left: 15px; margin-left: 15px; display: flex; align-items: center; gap: 10px; background-color: var(--bg-element); padding: 10px; border-radius: var(--radius);">
+                        <span style="font-weight: 600; color: var(--text-main);">Решение:</span>
+
+
+                        <form asp-action="ChangeStatus" method="post" style="margin: 0;">
+                            <input type="hidden" name="id" value="@Model.Id" />
+                            <input type="hidden" name="newStatus" value="approved" />
+                            <button type="submit" class="btn"
+                                style="background-color: var(--success-color); color: var(--text-main);">Утвердить</button>
+                        </form>
+
+
+                        <form asp-action="ChangeStatus" method="post" style="margin: 0;">
+                            <input type="hidden" name="id" value="@Model.Id" />
+                            <input type="hidden" name="newStatus" value="rejected" />
+                            <button type="submit" class="btn"
+                                style="border: 1px solid var(--danger-color); background-color: transparent; color: var(--danger-color);">Отклонить</button>
+                        </form>
+                    </div>
                 }
             </div>
         </div>
 
-        @* === 3. ДАННЫЕ ПРОГРАММЫ === *@
+
         <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px; margin-bottom: 40px; padding-top: 20px;">
-            <div class="info-data-block" style="border: 1px solid #ccc; padding: 20px; border-radius: var(--radius); background-color: var(--bg-element);">
+            <div class="info-data-block"
+                style="border: 1px solid #ccc; padding: 20px; border-radius: var(--radius); background-color: var(--bg-element);">
                 <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 15px;">
                     <div class="input-group-custom">
                         <label class="info-label">Название программы</label>
@@ -100,7 +108,8 @@
             </div>
 
             <div>
-                <div class="card-style" style="padding: 15px; background-color: var(--bg-element); border: 1px solid #ccc;">
+                <div class="card-style"
+                    style="padding: 15px; background-color: var(--bg-element); border: 1px solid #ccc;">
                     <div class="info-item">
                         <div class="info-label" style="font-size: 0.9em; color: var(--text-muted);">Направление</div>
                         <div class="readonly-box-mini">@Model.Specialty?.Direction</div>
@@ -119,10 +128,10 @@
 
         <hr style="border-top: 1px solid #ccc; margin: 30px 0;" />
 
-        @* === 4. ПРЕПОДАВАТЕЛЬСКИЙ СОСТАВ === *@
+
         <h5 style="color: var(--text-main); margin-top: 40px; margin-bottom: 20px;">Преподавательский состав</h5>
 
-        @* ИСПОЛЬЗУЕМ НОВЫЙ КЛАСС table-soft-bordered *@
+
         <table class="table-soft-bordered">
             <thead>
                 <tr>
@@ -136,7 +145,8 @@
                     <tr>
                         <td>@dt.Teacher.Surname @dt.Teacher.Name @dt.Teacher.Patronymic</td>
                         <td>
-                            <span style="background-color: var(--bg-element); border: 1px solid #ddd; padding: 4px 8px; border-radius: 4px;">
+                            <span
+                                style="background-color: var(--bg-element); border: 1px solid #ddd; padding: 4px 8px; border-radius: 4px;">
                                 @dt.ParticipationType
                             </span>
                         </td>
@@ -147,20 +157,21 @@
 
         <hr style="border-top: 1px solid #ccc; margin: 40px 0;" />
 
-        @* === 5. УЧЕБНЫЙ ПЛАН ПО СЕМЕСТРАМ === *@
+
         <h4 style="color: var(--accent-dark); margin-bottom: 30px;">Учебный план по семестрам</h4>
 
         <div id="semestersContainer">
             @foreach (var wl in Model.WorkLoads.OrderBy(w => w.Semester))
             {
                 <div class="semester-card card-style" style="margin-bottom: 30px; padding: 20px; border: 1px solid #ddd;">
-                    <div class="semester-header-custom" style="border-bottom: 2px solid var(--accent-color); padding-bottom: 10px; margin-bottom: 20px;">
+                    <div class="semester-header-custom"
+                        style="border-bottom: 2px solid var(--accent-color); padding-bottom: 10px; margin-bottom: 20px;">
                         <h5 style="color: var(--accent-dark); font-weight: 700; margin: 0;">
                             Семестр @wl.Semester
                         </h5>
                     </div>
-                   
-                    @* --- ВОТ ТУТ ТЕПЕРЬ ТАБЛИЦА ВМЕСТО КАРТОЧЕК --- *@
+
+
                     <div style="margin-bottom: 25px;">
                         <table class="table-soft-bordered workload-table">
                             <thead>
@@ -184,10 +195,10 @@
                         </table>
                     </div>
 
-                    @* ТАБЛИЦА РАЗДЕЛОВ *@
+
                     <div style="margin-top: 10px;">
                         <h6 style="color: var(--text-muted); margin-bottom: 10px;">Разделы дисциплины:</h6>
-                        
+
                         <table class="table-soft-bordered">
                             <thead>
                                 <tr>
@@ -222,27 +233,32 @@
 
         <hr style="border-top: 1px solid #ccc; margin: 40px 0;" />
 
-        @* === 6. МЕТОДИЧЕСКИЕ МАТЕРИАЛЫ === *@
+
         <h4 style="color: var(--accent-dark); margin-bottom: 30px;">Методические материалы</h4>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
-            <div class="input-group-custom info-data-block" style="border: 1px solid #ccc; padding: 15px; border-radius: var(--radius);">
+            <div class="input-group-custom info-data-block"
+                style="border: 1px solid #ccc; padding: 15px; border-radius: var(--radius);">
                 <label class="info-label methodical-label">Цели и задачи</label>
                 <div class="readonly-box" style="white-space:pre-line;">@Model.Goals</div>
             </div>
-            <div class="input-group-custom info-data-block" style="border: 1px solid #ccc; padding: 15px; border-radius: var(--radius);">
+            <div class="input-group-custom info-data-block"
+                style="border: 1px solid #ccc; padding: 15px; border-radius: var(--radius);">
                 <label class="info-label methodical-label">Компетенции</label>
                 <div class="readonly-box" style="white-space:pre-line;">@Model.Competencies</div>
             </div>
-            <div class="input-group-custom info-data-block" style="border: 1px solid #ccc; padding: 15px; border-radius: var(--radius);">
+            <div class="input-group-custom info-data-block"
+                style="border: 1px solid #ccc; padding: 15px; border-radius: var(--radius);">
                 <label class="info-label methodical-label">Требования</label>
                 <div class="readonly-box" style="white-space:pre-line;">@Model.Requirements</div>
             </div>
-            <div class="input-group-custom info-data-block" style="border: 1px solid #ccc; padding: 15px; border-radius: var(--radius);">
+            <div class="input-group-custom info-data-block"
+                style="border: 1px solid #ccc; padding: 15px; border-radius: var(--radius);">
                 <label class="info-label methodical-label">Место дисциплины</label>
                 <div class="readonly-box" style="white-space:pre-line;">@Model.DisciplinePosition</div>
             </div>
-            <div class="input-group-custom info-data-block" style="grid-column: span 2; border: 1px solid #ccc; padding: 15px; border-radius: var(--radius);">
+            <div class="input-group-custom info-data-block"
+                style="grid-column: span 2; border: 1px solid #ccc; padding: 15px; border-radius: var(--radius);">
                 <label class="info-label methodical-label">Литература</label>
                 <div class="readonly-box" style="white-space:pre-line;">@Model.Literature</div>
             </div>

@@ -8,18 +8,20 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
 
 <div class="container program-container">
-    
-    @* === 1. ВЕРХНЯЯ ЧАСТЬ (КНОПКА НАЗАД) === *@
+
+
     <div style="margin-bottom: 20px;">
-        <a asp-controller="Home" asp-action="Index" class="back-button" style="text-decoration: none; color: var(--accent-dark); font-weight: 500;">
+        <a asp-controller="Home" asp-action="Index" class="back-button"
+            style="text-decoration: none; color: var(--accent-dark); font-weight: 500;">
             <span class="back-icon" style="margin-right: 5px;">←</span> На Главный Экран
         </a>
     </div>
 
-    @* === 2. ОБЩАЯ ВНЕШНЯЯ РАМКА === *@
-    <div class="card-style" style="border: 1px solid #ccc; padding: 30px; border-radius: var(--radius); background-color: white; min-height: 80vh;">
 
-        @* === ЗАГОЛОВОК СТРАНИЦЫ === *@
+    <div class="card-style"
+        style="border: 1px solid #ccc; padding: 30px; border-radius: var(--radius); background-color: white; min-height: 80vh;">
+
+
         <div style="text-align: center; margin-top: 10px; margin-bottom: 40px;">
             <h2 style="color: var(--text-main); font-size: 1.8rem; margin-bottom: 10px;">
                 Список Направлений и Специальностей
@@ -39,9 +41,10 @@
             @foreach (var group in Model)
             {
                 <div class="direction-section" style="margin-bottom: 40px;">
-                    
-                    @* === ЗАГОЛОВОК ГРУППЫ === *@
-                    <div class="direction-header-styled" style="display: flex; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #eee;">
+
+
+                    <div class="direction-header-styled"
+                        style="display: flex; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #eee;">
                         <span style="font-size: 1.2rem; margin-right: 12px; color: var(--accent-dark);">
                             <i class="fas fa-folder-open"></i>
                         </span>
@@ -50,36 +53,38 @@
                         </h4>
                     </div>
 
-                    @* === СПИСОК (ТЕПЕРЬ ВЕРТИКАЛЬНЫЙ) === *@
-                    @* Используем flex-direction: column для вертикального стека *@
+
+
                     <div class="program-list" style="display: flex; flex-direction: column; gap: 10px;">
                         @foreach (var specialty in group.Specialties)
                         {
-                            <a asp-controller="Curriculum" asp-action="Index" 
-                               asp-route-specialtyId="@specialty.Id" 
-                               class="program-card-styled" 
-                               style="text-decoration: none; color: inherit; display: block; width: 100%;">
-                                
-                                @* ВНУТРЕННИЙ БЛОК (Серый фон) *@
-                                @* flex-row: Чтобы текст был слева, а стрелка справа *@
-                                <div style="background-color: var(--bg-element); padding: 15px 20px; border-radius: var(--radius); border: 1px solid #ccc; transition: all 0.2s ease; display: flex; align-items: center; justify-content: space-between;">
-                                    
-                                    @* ЛЕВАЯ ЧАСТЬ: Иконка и Название *@
+                            <a asp-controller="Curriculum" asp-action="Index" asp-route-specialtyId="@specialty.Id"
+                                class="program-card-styled"
+                                style="text-decoration: none; color: inherit; display: block; width: 100%;">
+
+
+
+                                <div
+                                    style="background-color: var(--bg-element); padding: 15px 20px; border-radius: var(--radius); border: 1px solid #ccc; transition: all 0.2s ease; display: flex; align-items: center; justify-content: space-between;">
+
+
                                     <div style="display: flex; align-items: center; gap: 15px;">
                                         <div style="color: #ccc; font-size: 1.2rem;">
                                             <i class="fas fa-graduation-cap"></i>
                                         </div>
                                         <div>
-                                            <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 2px;">
+                                            <span
+                                                style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 2px;">
                                                 Специальность
                                             </span>
-                                            <h3 class="program-discipline-name" style="font-size: 1.1rem; margin: 0; color: var(--text-main); font-weight: 600;">
+                                            <h3 class="program-discipline-name"
+                                                style="font-size: 1.1rem; margin: 0; color: var(--text-main); font-weight: 600;">
                                                 @specialty.SpecialtyName
                                             </h3>
                                         </div>
                                     </div>
 
-                                    @* ПРАВАЯ ЧАСТЬ: Стрелочка *@
+
                                     <div style="color: var(--accent-dark); padding-left: 20px;">
                                         <i class="fas fa-chevron-right"></i>
                                     </div>

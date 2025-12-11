@@ -1,7 +1,3 @@
-// MyWebApp/Models/User.cs
-
-using System.Collections.Generic;
-
 namespace MyWebApp.Models
 {
     public class User

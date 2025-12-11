@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using MyWebApp.Models; // Замени на имя твоего проекта
-using System.Reflection; // Для получения свойств через рефлексию
+using MyWebApp.Models;
+using System.Reflection;
 
 namespace MyWebApp.Data
 {
@@ -11,7 +11,6 @@ namespace MyWebApp.Data
         {
         }
 
-        // DbSets — это "окна" в таблицы БД
         public DbSet<Faculty> Faculties { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Department> Departments { get; set; }
@@ -27,9 +26,6 @@ namespace MyWebApp.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-
-            // Укажем, что столбец 'Id' в C# соответствует столбцу 'id' в БД для всех сущностей
-            // Это работает только для Primary Key (Id -> id)
             foreach (var entityType in modelBuilder.Model.GetEntityTypes())
             {
                 var pk = entityType.FindPrimaryKey();
@@ -43,9 +39,6 @@ namespace MyWebApp.Data
                 }
             }
 
-            // Настройка таблиц и столбцов для соответствия БД
-
-            // Faculty
             modelBuilder.Entity<Faculty>()
                 .ToTable("Faculty")
                 .Property(f => f.Id).HasColumnName("id");
@@ -54,9 +47,8 @@ namespace MyWebApp.Data
             modelBuilder.Entity<Faculty>()
                 .Property(f => f.Description).HasColumnName("description");
 
-            // User
             modelBuilder.Entity<User>()
-                .ToTable("User") // Важно: с заглавной буквы, как в БД
+                .ToTable("User")
                 .Property(u => u.Id).HasColumnName("id");
             modelBuilder.Entity<User>()
                 .Property(u => u.Surname).HasColumnName("surname");
@@ -71,31 +63,24 @@ namespace MyWebApp.Data
             modelBuilder.Entity<User>()
                 .Property(u => u.Password).HasColumnName("password");
 
-            // Department
             modelBuilder.Entity<Department>()
                 .ToTable("Department")
                 .Property(d => d.Id).HasColumnName("id");
             modelBuilder.Entity<Department>()
                 .Property(d => d.FacultyId).HasColumnName("faculty_id");
             modelBuilder.Entity<Department>()
-                .Property(d => d.HeadId).HasColumnName("head_id"); // <-- Вот это важно
+                .Property(d => d.HeadId).HasColumnName("head_id");
             modelBuilder.Entity<Department>()
                 .Property(d => d.Name).HasColumnName("name");
-
-            // Связь Department -> Faculty
             modelBuilder.Entity<Department>()
                 .HasOne(d => d.Faculty)
                 .WithMany(f => f.Departments)
-                .HasForeignKey(d => d.FacultyId); // Указываем имя столбца в БД
-
-            // Связь Department -> User (Head)
+                .HasForeignKey(d => d.FacultyId);
             modelBuilder.Entity<Department>()
                 .HasOne(d => d.Head)
                 .WithMany()
-                .HasForeignKey(d => d.HeadId); // ← используем свойство
+                .HasForeignKey(d => d.HeadId);
 
-
-            // Specialty
             modelBuilder.Entity<Specialty>()
                 .ToTable("Specialty")
                 .Property(s => s.Id).HasColumnName("id");
@@ -110,21 +95,17 @@ namespace MyWebApp.Data
             modelBuilder.Entity<Specialty>()
                 .Property(s => s.Duration).HasColumnName("duration");
 
-            // Связь Specialty -> Department
             modelBuilder.Entity<Specialty>()
                 .HasOne(s => s.Department)
                 .WithMany(d => d.Specialties)
                 .HasForeignKey(t => t.DepartmentId);
 
-
-            // Discipline
             modelBuilder.Entity<Discipline>()
                 .ToTable("Discipline")
                 .Property(d => d.Id).HasColumnName("id");
             modelBuilder.Entity<Discipline>()
                 .Property(d => d.Name).HasColumnName("name");
 
-            // Curriculum
             modelBuilder.Entity<Curriculum>()
                 .ToTable("Curriculum")
                 .Property(c => c.Id).HasColumnName("id");
@@ -137,7 +118,6 @@ namespace MyWebApp.Data
             modelBuilder.Entity<Curriculum>()
                 .Property(c => c.CertificationType).HasColumnName("certification_type");
 
-            // Связи Curriculum
             modelBuilder.Entity<Curriculum>()
                 .HasOne(c => c.Specialty)
                 .WithMany(s => s.Curricula)
@@ -147,7 +127,6 @@ namespace MyWebApp.Data
                 .WithMany(d => d.Curricula)
                 .HasForeignKey(dt => dt.DisciplineId);
 
-            // AcademicProgram
             modelBuilder.Entity<AcademicProgram>()
                 .ToTable("AcademicProgram")
                 .Property(ap => ap.Id).HasColumnName("id");
@@ -172,18 +151,16 @@ namespace MyWebApp.Data
             modelBuilder.Entity<AcademicProgram>()
                 .Property(ap => ap.Literature).HasColumnName("literature");
 
-            // Связи AcademicProgram
             modelBuilder.Entity<AcademicProgram>()
                 .HasOne(ap => ap.Specialty)
                 .WithMany(s => s.AcademicPrograms)
                 .HasForeignKey(dt => dt.SpecialtyId);
-                
+
             modelBuilder.Entity<AcademicProgram>()
                 .HasOne(ap => ap.Discipline)
                 .WithMany(d => d.AcademicPrograms)
                 .HasForeignKey(dt => dt.DisciplineId);
 
-            // TeacherAssignment
             modelBuilder.Entity<TeacherAssignment>()
                 .ToTable("TeacherAssignment")
                 .Property(ta => ta.Id).HasColumnName("id");
@@ -192,19 +169,16 @@ namespace MyWebApp.Data
             modelBuilder.Entity<TeacherAssignment>()
                 .Property(ta => ta.TeacherId).HasColumnName("teacher_id");
 
-            // Связи TeacherAssignment
             modelBuilder.Entity<TeacherAssignment>()
                 .HasOne(ta => ta.Department)
                 .WithMany(d => d.TeacherAssignments)
                 .HasForeignKey(t => t.DepartmentId);
 
             modelBuilder.Entity<TeacherAssignment>()
-                .HasOne(ta => ta.Teacher) // У тебя это User
+                .HasOne(ta => ta.Teacher)
                 .WithMany(u => u.TeacherAssignments)
                 .HasForeignKey(dt => dt.TeacherId);
 
-
-            // DisciplineTeacher
             modelBuilder.Entity<DisciplineTeacher>()
                 .ToTable("DisciplineTeacher")
                 .Property(dt => dt.Id).HasColumnName("id");
@@ -215,9 +189,8 @@ namespace MyWebApp.Data
             modelBuilder.Entity<DisciplineTeacher>()
                 .Property(dt => dt.ParticipationType).HasColumnName("participation_type");
 
-            // Связи DisciplineTeacher
             modelBuilder.Entity<DisciplineTeacher>()
-                .HasOne(dt => dt.Teacher) // User
+                .HasOne(dt => dt.Teacher)
                 .WithMany(u => u.DisciplineTeachers)
                 .HasForeignKey(dt => dt.TeacherId);
             modelBuilder.Entity<DisciplineTeacher>()
@@ -225,8 +198,6 @@ namespace MyWebApp.Data
                 .WithMany(d => d.DisciplineTeachers)
                 .HasForeignKey(dt => dt.DisciplineId);
 
-
-            // WorkLoad
             modelBuilder.Entity<WorkLoad>()
                 .ToTable("WorkLoad")
                 .Property(wl => wl.Id).HasColumnName("id");
@@ -245,21 +216,18 @@ namespace MyWebApp.Data
             modelBuilder.Entity<WorkLoad>()
                 .Property(wl => wl.AssessmentType).HasColumnName("assessment_type");
 
-            // Связь WorkLoad -> AcademicProgram
             modelBuilder.Entity<WorkLoad>()
                 .HasOne(wl => wl.AcademicProgram)
                 .WithMany(ap => ap.WorkLoads)
                 .HasForeignKey(dt => dt.AcademicProgramId);
 
-
-            // Sections
             modelBuilder.Entity<Sections>()
                 .ToTable("Sections")
                 .Property(s => s.Id).HasColumnName("id");
             modelBuilder.Entity<Sections>()
                 .Property(s => s.WorkLoadId).HasColumnName("work_load_id");
             modelBuilder.Entity<Sections>()
-                .Property(s => s.Index).HasColumnName("index"); // "index" - ключевое слово, но PostgreSQL позволяет
+                .Property(s => s.Index).HasColumnName("index");
             modelBuilder.Entity<Sections>()
                 .Property(s => s.Name).HasColumnName("name");
             modelBuilder.Entity<Sections>()
@@ -273,7 +241,6 @@ namespace MyWebApp.Data
             modelBuilder.Entity<Sections>()
                 .Property(s => s.SelfStudyHours).HasColumnName("self_study_hours");
 
-            // Связь Sections -> WorkLoad
             modelBuilder.Entity<Sections>()
                 .HasOne(s => s.WorkLoad)
                 .WithMany(wl => wl.Sections)

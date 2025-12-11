@@ -1,5 +1,5 @@
 @model Faculty
-<link rel="stylesheet" href="~/css/site.css"  asp-append-version="true"  />
+<link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 
 <div class="container faculty-container">
     <a href="/Faculty" class="back-button">
@@ -9,25 +9,25 @@
     <h2 class="faculty-title"> @Model.Name</h2>
 
     <div class="faculty-list">
-    @foreach (var dep in Model.Departments)
-    {
-        <a href="/Teachers/Index/@dep.Id" class="faculty-card">
+        @foreach (var dep in Model.Departments)
+        {
+            <a href="/Teachers/Index/@dep.Id" class="faculty-card">
 
-            <div class="faculty-info">
+                <div class="faculty-info">
 
-                <div class="faculty-row">
-                    <div class="faculty-name">@dep.Name</div>
-                </div>
-
-                <div class="faculty-row">
-                    <div class="faculty-head">
-                        Заведующий: @dep.Head?.Surname @dep.Head?.Name @dep.Head?.Patronymic
+                    <div class="faculty-row">
+                        <div class="faculty-name">@dep.Name</div>
                     </div>
+
+                    <div class="faculty-row">
+                        <div class="faculty-head">
+                            Заведующий: @dep.Head?.Surname @dep.Head?.Name @dep.Head?.Patronymic
+                        </div>
+                    </div>
+
                 </div>
 
-            </div>
-
-        </a>
-    }
+            </a>
+        }
     </div>
 </div>

@@ -11,12 +11,11 @@ public class DepartmentsController : Controller
         _context = context;
     }
 
-    // /Departments?facultyId=5
     public async Task<IActionResult> Index(int facultyId)
     {
         var faculty = await _context.Faculties
             .Include(f => f.Departments)
-                .ThenInclude(d => d.Head) // <-- это важно для заведующего
+                .ThenInclude(d => d.Head)
             .FirstOrDefaultAsync(f => f.Id == facultyId);
 
         if (faculty == null)

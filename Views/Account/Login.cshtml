@@ -2,7 +2,7 @@
     ViewData["Title"] = "Вход";
 }
 
-<link rel="stylesheet" href="~/css/login.css"  asp-append-version="true" /> 
+<link rel="stylesheet" href="~/css/login.css" asp-append-version="true" />
 
 <div class="login-background">
 
@@ -10,7 +10,6 @@
 
         <h2>Вход в систему</h2>
 
-        @* 🚨 ОБНОВЛЕННЫЙ БЛОК ОШИБКИ *@
         @if (TempData["ErrorMessage"] != null)
         {
             <div class="alert alert-danger login-error-message" role="alert">
@@ -20,7 +19,7 @@
         }
 
         <form asp-controller="Account" asp-action="Login" method="post">
-            
+
             <div class="form-group" style="margin-bottom: 20px;">
                 <label for="login">Логин:</label>
                 <input type="text" name="login" id="login" class="form-control" required placeholder="Введите логин">
@@ -28,7 +27,8 @@
 
             <div class="form-group" style="margin-bottom: 30px;">
                 <label for="password">Пароль:</label>
-                <input type="password" name="password" id="password" class="form-control" required placeholder="Введите пароль">
+                <input type="password" name="password" id="password" class="form-control" required
+                    placeholder="Введите пароль">
             </div>
 
             <button type="submit">Войти</button>

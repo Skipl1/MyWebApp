@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace MyWebApp.Models
 {
     public class AcademicProgram
@@ -9,14 +7,13 @@ namespace MyWebApp.Models
         public int DisciplineId { get; set; }
         public string Name { get; set; } = null!;
         public int StartYear { get; set; }
-        public string Status { get; set; } = null!; // "draft", "approved", etc.
-        public string? Goals { get; set; } // nullable
-        public string? Competencies { get; set; } // nullable
-        public string? Requirements { get; set; } // nullable
-        public string? DisciplinePosition { get; set; } // nullable
-        public string? Literature { get; set; } // nullable
+        public string Status { get; set; } = null!;
+        public string? Goals { get; set; }
+        public string? Competencies { get; set; }
+        public string? Requirements { get; set; }
+        public string? DisciplinePosition { get; set; }
+        public string? Literature { get; set; }
 
-        // Navigation
         public virtual Specialty Specialty { get; set; } = null!;
         public virtual Discipline Discipline { get; set; } = null!;
         public virtual ICollection<WorkLoad> WorkLoads { get; set; } = new List<WorkLoad>();

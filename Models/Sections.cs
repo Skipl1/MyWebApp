@@ -4,15 +4,14 @@ namespace MyWebApp.Models
     {
         public int Id { get; set; }
         public int WorkLoadId { get; set; }
-        public int Index { get; set; } // индекс раздела
+        public int Index { get; set; }
         public string Name { get; set; } = null!;
-        public string? Description { get; set; } // nullable
-        public int? LectureHours { get; set; } // nullable
-        public int? LabHours { get; set; } // nullable
-        public int? SeminarHours { get; set; } // nullable
-        public int? SelfStudyHours { get; set; } // nullable
+        public string? Description { get; set; }
+        public int? LectureHours { get; set; }
+        public int? LabHours { get; set; }
+        public int? SeminarHours { get; set; }
+        public int? SelfStudyHours { get; set; }
 
-        // Navigation
         public virtual WorkLoad WorkLoad { get; set; } = null!;
     }
 }

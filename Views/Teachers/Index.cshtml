@@ -5,7 +5,7 @@
 <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 
 <div class="container department-page">
-    
+
     <a href="/Departments?facultyId=@Model.FacultyId" class="back-button">
         <span class="back-icon">←</span> Назад к списку кафедр
     </a>
@@ -13,19 +13,16 @@
     <h2 class="faculty-title">@Model.Name</h2>
 
     <div class="faculty-head" style="text-align:center; margin-bottom: 25px;">
-        Заведующий: 
+        Заведующий:
         <b>@Model.Head?.Surname @Model.Head?.Name @Model.Head?.Patronymic</b>
     </div>
 
     @{
-        // 1. Получаем текущего пользователя по имени (ФИО)
         var currentUser = await Context.Users
-            .FirstOrDefaultAsync(u => (u.Surname + " " + u.Name) == User.Identity.Name);
+        .FirstOrDefaultAsync(u => (u.Surname + " " + u.Name) == User.Identity.Name);
 
-        // 2. Проверяем, является ли текущий пользователь заведующим данной кафедрой
         var isHead = currentUser != null && Model.Head != null && currentUser.Login == Model.Head.Login;
-        
-        // 3. Получаем список всех дисциплин для формы добавления
+
         var disciplines = await Context.Disciplines.ToListAsync();
     }
 
@@ -56,7 +53,7 @@
                                         @dt.Discipline.Name — <b>@dt.ParticipationType</b>
                                     </span>
 
-                                    @* Отображаем кнопку "Удалить" только для заведующего кафедрой *@
+
                                     @if (User.Identity.IsAuthenticated && isHead)
                                     {
                                         <form method="post" asp-controller="Teachers" asp-action="RemoveDiscipline">
@@ -70,11 +67,10 @@
                         </ul>
                     </div>
 
-                    @* Блок для добавления дисциплины (доступен только заведующему) *@
+
                     @if (User.Identity.IsAuthenticated && isHead)
                     {
-                        <button type="button" class="btn add-button"
-                                onclick="toggleForm(@teacher.Id, this)">
+                        <button type="button" class="btn add-button" onclick="toggleForm(@teacher.Id, this)">
                             Добавить дисциплину
                         </button>
 
@@ -112,7 +108,7 @@
     function toggleForm(id, button) {
         const form = document.getElementById("form-" + id);
 
-        form.style.display = "block";   // ПОКАЗЫВАЕМ ФОРМУ
-        button.style.display = "none";  // СКРЫВАЕМ КНОПКУ "Добавить"
+        form.style.display = "block";
+        button.style.display = "none";
     }
 </script>

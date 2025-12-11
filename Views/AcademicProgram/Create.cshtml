@@ -4,105 +4,113 @@
     ViewData["Title"] = "Создание программы";
 }
 
-@* === СТИЛИ ИЗ DETAILS (ЕДИНЫЙ ДИЗАЙН) === *@
+
 <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
 
 <div class="container program-container">
-    
-    @* === 1. ВЕРХНЯЯ ЧАСТЬ (КНОПКА НАЗАД) === *@
+
+
     <div style="margin-bottom: 20px;">
-        <a asp-action="Index" class="back-button" style="text-decoration: none; color: var(--accent-dark); font-weight: 500;">
+        <a asp-action="Index" class="back-button"
+            style="text-decoration: none; color: var(--accent-dark); font-weight: 500;">
             <span class="back-icon" style="margin-right: 5px;">←</span> Назад к списку
         </a>
     </div>
 
     <form asp-action="Create" method="post" id="createForm">
         @Html.AntiForgeryToken()
-        <input type="hidden" asp-for="Status" value="draft" /> 
-        
-        @* === 2. ОБЩАЯ ВНЕШНЯЯ РАМКА (card-style) для ВСЕЙ ФОРМЫ === *@
-        <div class="card-style" style="border: 1px solid #ccc; padding: 30px; border-radius: var(--radius); background-color: white;">
-            
-            @* ЗАГОЛОВОК *@
+        <input type="hidden" asp-for="Status" value="draft" />
+
+
+        <div class="card-style"
+            style="border: 1px solid #ccc; padding: 30px; border-radius: var(--radius); background-color: white;">
+
+
             <div style="text-align: center; margin-top: 15px; margin-bottom: 30px;">
-                <h2 style="color: var(--text-main); font-size: 1.8rem; margin-bottom: 15px;">Создание учебной программы</h2>
+                <h2 style="color: var(--text-main); font-size: 1.8rem; margin-bottom: 15px;">Создание учебной программы
+                </h2>
                 <div asp-validation-summary="All" class="text-danger" style="margin-top: 10px;"></div>
             </div>
 
-            @* ОСНОВНЫЕ ДАННЫЕ (ДВЕ СЕРЫЕ ПАНЕЛИ) *@
+
             <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px; padding-top: 10px;">
-                
-                @* ЛЕВАЯ КОЛОНКА: ВВОД ДАННЫХ (в сером окне) *@
-                <div style="background-color: var(--bg-element); padding: 20px; border-radius: var(--radius); border: 1px solid #ccc; height: fit-content;">
-                    
+
+
+                <div
+                    style="background-color: var(--bg-element); padding: 20px; border-radius: var(--radius); border: 1px solid #ccc; height: fit-content;">
+
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                        @* Название *@
+
                         <div class="input-group-custom" style="grid-column: span 2;">
                             <label asp-for="Name" class="info-label">Название программы *</label>
                             <input asp-for="Name" class="form-control-custom" placeholder="Введите название..." />
                         </div>
 
-                        @* Дисциплина *@
+
                         <div class="input-group-custom">
                             <label asp-for="DisciplineId" class="info-label">Дисциплина *</label>
-                            <select asp-for="DisciplineId" class="form-control-custom" id="disciplineSelect" asp-items="ViewBag.Disciplines">
+                            <select asp-for="DisciplineId" class="form-control-custom" id="disciplineSelect"
+                                asp-items="ViewBag.Disciplines">
                                 <option value="" disabled selected>-- Выберите --</option>
                             </select>
                         </div>
 
-                        @* Год *@
+
                         <div class="input-group-custom">
                             <label asp-for="StartYear" class="info-label">Год начала *</label>
-                            <input asp-for="StartYear" type="number" class="form-control-custom" value="@DateTime.Now.Year" />
+                            <input asp-for="StartYear" type="number" class="form-control-custom"
+                                value="@DateTime.Now.Year" />
                         </div>
 
-                        @* Специальность *@
+
                         <div class="input-group-custom" style="grid-column: span 2;">
                             <label asp-for="SpecialtyId" class="info-label">Специальность *</label>
-                            <select asp-for="SpecialtyId" class="form-control-custom" id="specialtySelect" asp-items="ViewBag.Specialties">
+                            <select asp-for="SpecialtyId" class="form-control-custom" id="specialtySelect"
+                                asp-items="ViewBag.Specialties">
                                 <option value="" disabled selected>-- Выберите --</option>
                             </select>
                         </div>
                     </div>
                 </div>
 
-                @* ПРАВАЯ КОЛОНКА: ИНФО (ОБНОВЛЕНО) *@
-                <div style="background-color: var(--bg-element); padding: 20px; border-radius: var(--radius); border: 1px solid #ccc; height: fit-content;">
-                    
-                    @* Направление *@
+
+                <div
+                    style="background-color: var(--bg-element); padding: 20px; border-radius: var(--radius); border: 1px solid #ccc; height: fit-content;">
+
+
                     <div class="info-item">
                         <div class="info-label" style="font-size: 0.9em; color: var(--text-muted);">Направление</div>
                         <div id="directionField" class="readonly-info-display">—</div>
                     </div>
-                    
-                    @* Срок обучения *@
+
+
                     <div class="info-item" style="margin-top: 15px;">
                         <div class="info-label" style="font-size: 0.9em; color: var(--text-muted);">Срок обучения</div>
                         <div id="durationField" class="readonly-info-display">—</div>
                     </div>
-                    
-                    @* Квалификация *@
+
+
                     <div class="info-item" style="margin-top: 15px;">
                         <div class="info-label" style="font-size: 0.9em; color: var(--text-muted);">Квалификация</div>
                         <div id="competenciesField" class="readonly-info-display" style="min-height: 80px;">—</div>
                     </div>
-                    
+
                 </div>
             </div>
-            
+
             <hr style="border-top: 1px solid #ccc; margin: 30px 0;" />
 
-            @* === 3. ПРЕПОДАВАТЕЛИ === *@
+
             <h5 style="color: var(--text-main); margin-bottom: 20px;">Преподавательский состав</h5>
 
             <div id="teachersSection">
                 <div id="teacherHelp" class="text-muted small mb-3">
                     <i class="fas fa-info-circle"></i> Выберите дисциплину выше, чтобы загрузить список.
                 </div>
-                
-                @* Таблица скрыта по умолчанию *@
-                <table class="table-soft-bordered" id="teachersTable"> 
+
+
+                <table class="table-soft-bordered" id="teachersTable">
                     <thead>
                         <tr>
                             <th style="width: 60%; text-align: left;">Преподаватель</th>
@@ -110,62 +118,74 @@
                         </tr>
                     </thead>
                     <tbody id="teachersList">
-                        @* Заполняется через JS *@
+
                     </tbody>
                 </table>
             </div>
 
             <hr style="border-top: 1px solid #ccc; margin: 40px 0;" />
 
-            @* === 4. УЧЕБНЫЙ ПЛАН (СЕМЕСТРЫ) === *@
+
             <h4 style="color: var(--accent-dark); margin-bottom: 30px;">Учебный план по семестрам</h4>
 
             <div id="semestersContainer">
-                @* Сюда добавляются блоки семестров через JS *@
+
             </div>
 
             <div style="text-align: center; margin-top: 20px;">
-                <button type="button" class="btn" style="border: 2px dashed var(--accent-dark); color: var(--accent-dark); background: transparent; padding: 10px 20px;" onclick="addSemesterBlock()">
+                <button type="button" class="btn"
+                    style="border: 2px dashed var(--accent-dark); color: var(--accent-dark); background: transparent; padding: 10px 20px;"
+                    onclick="addSemesterBlock()">
                     <i class="fas fa-plus-circle"></i> ДОБАВИТЬ СЕМЕСТР
                 </button>
             </div>
 
             <hr style="border-top: 1px solid #ccc; margin: 40px 0;" />
 
-            @* === 5. МЕТОДИЧЕСКИЕ МАТЕРИАЛЫ === *@
+
             <h4 style="color: var(--accent-dark); margin-bottom: 30px;">Методические материалы</h4>
-            
+
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 40px;">
-                <div class="input-group-custom info-data-block" style="border: 1px solid #ccc; padding: 15px; border-radius: var(--radius);">
+                <div class="input-group-custom info-data-block"
+                    style="border: 1px solid #ccc; padding: 15px; border-radius: var(--radius);">
                     <label asp-for="Goals" class="info-label methodical-label">Цели и задачи</label>
-                    <textarea asp-for="Goals" class="form-control-custom" rows="4" style="resize:vertical; width: 100%;"></textarea>
+                    <textarea asp-for="Goals" class="form-control-custom" rows="4"
+                        style="resize:vertical; width: 100%;"></textarea>
                 </div>
-                <div class="input-group-custom info-data-block" style="border: 1px solid #ccc; padding: 15px; border-radius: var(--radius);">
+                <div class="input-group-custom info-data-block"
+                    style="border: 1px solid #ccc; padding: 15px; border-radius: var(--radius);">
                     <label asp-for="Competencies" class="info-label methodical-label">Компетенции</label>
-                    <textarea asp-for="Competencies" class="form-control-custom" rows="4" style="resize:vertical; width: 100%;"></textarea>
+                    <textarea asp-for="Competencies" class="form-control-custom" rows="4"
+                        style="resize:vertical; width: 100%;"></textarea>
                 </div>
-                <div class="input-group-custom info-data-block" style="border: 1px solid #ccc; padding: 15px; border-radius: var(--radius);">
+                <div class="input-group-custom info-data-block"
+                    style="border: 1px solid #ccc; padding: 15px; border-radius: var(--radius);">
                     <label asp-for="Requirements" class="info-label methodical-label">Требования</label>
-                    <textarea asp-for="Requirements" class="form-control-custom" rows="4" style="resize:vertical; width: 100%;"></textarea>
+                    <textarea asp-for="Requirements" class="form-control-custom" rows="4"
+                        style="resize:vertical; width: 100%;"></textarea>
                 </div>
-                <div class="input-group-custom info-data-block" style="border: 1px solid #ccc; padding: 15px; border-radius: var(--radius);">
+                <div class="input-group-custom info-data-block"
+                    style="border: 1px solid #ccc; padding: 15px; border-radius: var(--radius);">
                     <label asp-for="DisciplinePosition" class="info-label methodical-label">Место дисциплины</label>
-                    <textarea asp-for="DisciplinePosition" class="form-control-custom" rows="4" style="resize:vertical; width: 100%;"></textarea>
+                    <textarea asp-for="DisciplinePosition" class="form-control-custom" rows="4"
+                        style="resize:vertical; width: 100%;"></textarea>
                 </div>
-                <div class="input-group-custom info-data-block" style="border: 1px solid #ccc; padding: 15px; border-radius: var(--radius); grid-column: span 2;">
+                <div class="input-group-custom info-data-block"
+                    style="border: 1px solid #ccc; padding: 15px; border-radius: var(--radius); grid-column: span 2;">
                     <label asp-for="Literature" class="info-label methodical-label">Литература</label>
-                    <textarea asp-for="Literature" class="form-control-custom" rows="4" style="resize:vertical; width: 100%;"></textarea>
+                    <textarea asp-for="Literature" class="form-control-custom" rows="4"
+                        style="resize:vertical; width: 100%;"></textarea>
                 </div>
             </div>
 
-            @* === КНОПКА СОХРАНИТЬ === *@
+
             <div style="margin-top: 30px; text-align: center;">
                 <button type="submit" class="btn btn-primary btn-lg">
-                СОХРАНИТЬ ПРОГРАММУ
+                    СОХРАНИТЬ ПРОГРАММУ
                 </button>
             </div>
-                        
-        </div> @* Закрытие card-style * *@
+
+        </div>
 
     </form>
 </div>
@@ -175,154 +195,154 @@
     <script>
         let semesterIndex = 0;
 
-        // --- 1. Функция создания строки преподавателя ---
+
         function createTeacherRow(teacherId = null, participationType = null, teacherName = null) {
             const displayTeacherName = teacherName || `ID: ${teacherId}`;
             const pType = participationType || '—';
-            
+
             return `
-                <tr>
-                    <td style="padding: 10px;">
-                        <input type="hidden" name="TeacherId" value="${teacherId}" />
-                        <span style="font-weight: 500;">${displayTeacherName}</span>
-                    </td>
-                    <td style="padding: 10px;">
-                        <input type="hidden" name="ParticipationType" value="${participationType}" />
-                        <span style="background-color: var(--bg-element); border: 1px solid #ddd; padding: 4px 8px; border-radius: 4px; font-size: 0.9em;">
-                            ${pType}
-                        </span>
-                    </td>
-                </tr>
-            `;
+                        <tr>
+                            <td style="padding: 10px;">
+                                <input type="hidden" name="TeacherId" value="${teacherId}" />
+                                <span style="font-weight: 500;">${displayTeacherName}</span>
+                            </td>
+                            <td style="padding: 10px;">
+                                <input type="hidden" name="ParticipationType" value="${participationType}" />
+                                <span style="background-color: var(--bg-element); border: 1px solid #ddd; padding: 4px 8px; border-radius: 4px; font-size: 0.9em;">
+                                    ${pType}
+                                </span>
+                            </td>
+                        </tr>
+                    `;
         }
 
-        // --- 2. Добавление блока семестра ---
+
         function addSemesterBlock() {
             const container = document.getElementById('semestersContainer');
-            const currentSemIndex = semesterIndex; 
+            const currentSemIndex = semesterIndex;
             const semNum = currentSemIndex + 1;
 
             const block = document.createElement('div');
-            block.classList.add('semester-card', 'card-style'); 
+            block.classList.add('semester-card', 'card-style');
             block.setAttribute('data-index', currentSemIndex);
             block.style.marginBottom = "30px";
             block.style.padding = "20px";
             block.style.border = "1px solid #ddd";
-            block.style.backgroundColor = 'var(--bg-element)'; // Стиль для семестровой карты
+            block.style.backgroundColor = 'var(--bg-element)';
 
             block.innerHTML = `
-                <div class="semester-header-custom" style="display: flex; justify-content: space-between; border-bottom: 2px solid var(--accent-color); padding-bottom: 10px; margin-bottom: 20px;">
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <h5 style="color: var(--accent-dark); font-weight: 700; margin: 0;">Семестр</h5>
-                        <input type="number" name="WorkLoads[${currentSemIndex}].Semester" class="form-control-custom" style="width: 70px; padding: 5px; text-align:center;" required min="1" value="${semNum}" />
-                    </div>
-                    <button type="button" class="btn" style="color: #95a5a6; border: 1px solid #bdc3c7; padding: 5px 10px; border-radius: 4px; background: transparent; cursor: pointer;" onclick="removeSemester(this)">
-                        <i class="fas fa-trash-alt"></i> Удалить
-                    </button>
-                </div>
+                        <div class="semester-header-custom" style="display: flex; justify-content: space-between; border-bottom: 2px solid var(--accent-color); padding-bottom: 10px; margin-bottom: 20px;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <h5 style="color: var(--accent-dark); font-weight: 700; margin: 0;">Семестр</h5>
+                                <input type="number" name="WorkLoads[${currentSemIndex}].Semester" class="form-control-custom" style="width: 70px; padding: 5px; text-align:center;" required min="1" value="${semNum}" />
+                            </div>
+                            <button type="button" class="btn" style="color: #95a5a6; border: 1px solid #bdc3c7; padding: 5px 10px; border-radius: 4px; background: transparent; cursor: pointer;" onclick="removeSemester(this)">
+                                <i class="fas fa-trash-alt"></i> Удалить
+                            </button>
+                        </div>
                 
-                <div style="margin-bottom: 25px;">
-                     <table class="table-soft-bordered workload-table" style="text-align: center;">
-                        <thead>
-                            <tr>
-                                <th>Лекции</th>
-                                <th>Лаб.</th>
-                                <th>Практ.</th>
-                                <th>СРС</th>
-                                <th>Аттестация</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td style="padding: 0;"><input type="number" name="WorkLoads[${currentSemIndex}].Lectures" class="table-input text-center" style="width:100%; border:none; padding:8px; background: white;" placeholder="0" /></td>
-                                <td style="padding: 0;"><input type="number" name="WorkLoads[${currentSemIndex}].Labs" class="table-input text-center" style="width:100%; border:none; padding:8px; background: white;" placeholder="0" /></td>
-                                <td style="padding: 0;"><input type="number" name="WorkLoads[${currentSemIndex}].Seminars" class="table-input text-center" style="width:100%; border:none; padding:8px; background: white;" placeholder="0" /></td>
-                                <td style="padding: 0;"><input type="number" name="WorkLoads[${currentSemIndex}].SelfStudy" class="table-input text-center" style="width:100%; border:none; padding:8px; background: white;" placeholder="0" /></td>
-                                <td style="padding: 0;">
-                                    <select name="WorkLoads[${currentSemIndex}].AssessmentType" class="table-input" style="width:100%; border:none; padding:8px; text-align: center; color: var(--accent-dark); font-weight:500; background: white;">
-                                        <option value="">--</option>
-                                        <option value="Экзамен">Экзамен</option>
-                                        <option value="Зачет">Зачет</option>
-                                        <option value="Курсовая">Курсовая</option>
-                                    </select>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+                        <div style="margin-bottom: 25px;">
+                             <table class="table-soft-bordered workload-table" style="text-align: center;">
+                                <thead>
+                                    <tr>
+                                        <th>Лекции</th>
+                                        <th>Лаб.</th>
+                                        <th>Практ.</th>
+                                        <th>СРС</th>
+                                        <th>Аттестация</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="padding: 0;"><input type="number" name="WorkLoads[${currentSemIndex}].Lectures" class="table-input text-center" style="width:100%; border:none; padding:8px; background: white;" placeholder="0" /></td>
+                                        <td style="padding: 0;"><input type="number" name="WorkLoads[${currentSemIndex}].Labs" class="table-input text-center" style="width:100%; border:none; padding:8px; background: white;" placeholder="0" /></td>
+                                        <td style="padding: 0;"><input type="number" name="WorkLoads[${currentSemIndex}].Seminars" class="table-input text-center" style="width:100%; border:none; padding:8px; background: white;" placeholder="0" /></td>
+                                        <td style="padding: 0;"><input type="number" name="WorkLoads[${currentSemIndex}].SelfStudy" class="table-input text-center" style="width:100%; border:none; padding:8px; background: white;" placeholder="0" /></td>
+                                        <td style="padding: 0;">
+                                            <select name="WorkLoads[${currentSemIndex}].AssessmentType" class="table-input" style="width:100%; border:none; padding:8px; text-align: center; color: var(--accent-dark); font-weight:500; background: white;">
+                                                <option value="">--</option>
+                                                <option value="Экзамен">Экзамен</option>
+                                                <option value="Зачет">Зачет</option>
+                                                <option value="Курсовая">Курсовая</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
 
-                <div>
-                    <h6 style="color: var(--text-muted); margin-bottom: 10px;">Разделы дисциплины:</h6>
-                    <table class="table-soft-bordered">
-                        <thead>
-                            <tr>
-                                <th style="width: 50px;">#</th>
-                                <th style="text-align: left;">Название раздела</th>
-                                <th style="text-align: left;">Краткое содержание</th>
-                                <th style="width: 50px;">Лек.</th>
-                                <th style="width: 50px;">Лаб.</th>
-                                <th style="width: 50px;">Сем.</th>
-                                <th style="width: 50px;">СРС</th>
-                                <th style="width: 40px;"></th>
-                            </tr>
-                        </thead>
-                        <tbody class="sections-body"></tbody>
-                    </table>
-                    <button type="button" class="btn" style="margin-top: 10px; font-size: 0.9em; color: var(--accent-dark); border: 1px dashed var(--accent-dark); background: transparent; padding: 5px 10px; border-radius: 4px; cursor: pointer;" onclick="addSectionRow(${currentSemIndex}, this)">
-                        <i class="fas fa-plus"></i> Добавить раздел
-                    </button>
-                </div>
-            `;
-            
+                        <div>
+                            <h6 style="color: var(--text-muted); margin-bottom: 10px;">Разделы дисциплины:</h6>
+                            <table class="table-soft-bordered">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 50px;">#</th>
+                                        <th style="text-align: left;">Название раздела</th>
+                                        <th style="text-align: left;">Краткое содержание</th>
+                                        <th style="width: 50px;">Лек.</th>
+                                        <th style="width: 50px;">Лаб.</th>
+                                        <th style="width: 50px;">Сем.</th>
+                                        <th style="width: 50px;">СРС</th>
+                                        <th style="width: 40px;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody class="sections-body"></tbody>
+                            </table>
+                            <button type="button" class="btn" style="margin-top: 10px; font-size: 0.9em; color: var(--accent-dark); border: 1px dashed var(--accent-dark); background: transparent; padding: 5px 10px; border-radius: 4px; cursor: pointer;" onclick="addSectionRow(${currentSemIndex}, this)">
+                                <i class="fas fa-plus"></i> Добавить раздел
+                            </button>
+                        </div>
+                    `;
+
             container.appendChild(block);
-            semesterIndex++; 
+            semesterIndex++;
         }
 
-        // --- 3. Добавление строки раздела (Такая же как была) ---
+
         function addSectionRow(parentIndex, btn) {
             const tbody = btn.previousElementSibling.querySelector('.sections-body');
             const sectionIndex = tbody.children.length;
             const row = document.createElement('tr');
-            
+
             row.innerHTML = `
-                <td style="padding: 0;">
-                    <input type="text" name="WorkLoads[${parentIndex}].Sections[${sectionIndex}].Index" class="table-input text-center" value="${sectionIndex + 1}" readonly style="width:100%; border:none; background:#f8f9fa; color: #777; padding:8px;" />
-                </td>
-                <td style="padding: 0;">
-                    <input type="text" name="WorkLoads[${parentIndex}].Sections[${sectionIndex}].Name" class="table-input" placeholder="Название..." required style="width:100%; border:none; padding:8px; font-weight: 500; background: white;" />
-                </td>
-                <td style="padding: 0;">
-                    <textarea name="WorkLoads[${parentIndex}].Sections[${sectionIndex}].Description" class="table-input" rows="1" placeholder="Содержание..." style="width:100%; border:none; padding:8px; resize:vertical; min-height: 38px; color: var(--text-muted); font-size: 0.9em; background: white;"></textarea>
-                </td>
-                <td style="padding: 0;"><input type="number" name="WorkLoads[${parentIndex}].Sections[${sectionIndex}].LectureHours" class="table-input text-center" value="0" style="width:100%; border:none; padding:8px; background: white;" /></td>
-                <td style="padding: 0;"><input type="number" name="WorkLoads[${parentIndex}].Sections[${sectionIndex}].LabHours" class="table-input text-center" value="0" style="width:100%; border:none; padding:8px; background: white;" /></td>
-                <td style="padding: 0;"><input type="number" name="WorkLoads[${parentIndex}].Sections[${sectionIndex}].SeminarHours" class="table-input text-center" value="0" style="width:100%; border:none; padding:8px; background: white;" /></td>
-                <td style="padding: 0;"><input type="number" name="WorkLoads[${parentIndex}].Sections[${sectionIndex}].SelfStudyHours" class="table-input text-center" value="0" style="width:100%; border:none; padding:8px; background: white;" /></td>
-                <td class="text-center" style="padding: 0;">
-                    <button type="button" class="btn" style="color: #95a5a6; background: transparent; border: none; cursor: pointer; padding: 8px;" onclick="this.closest('tr').remove()" title="Удалить строку">
-                        <i class="fas fa-trash-alt"></i>
-                    </button>
-                </td>
-            `;
+                        <td style="padding: 0;">
+                            <input type="text" name="WorkLoads[${parentIndex}].Sections[${sectionIndex}].Index" class="table-input text-center" value="${sectionIndex + 1}" readonly style="width:100%; border:none; background:#f8f9fa; color: #777; padding:8px;" />
+                        </td>
+                        <td style="padding: 0;">
+                            <input type="text" name="WorkLoads[${parentIndex}].Sections[${sectionIndex}].Name" class="table-input" placeholder="Название..." required style="width:100%; border:none; padding:8px; font-weight: 500; background: white;" />
+                        </td>
+                        <td style="padding: 0;">
+                            <textarea name="WorkLoads[${parentIndex}].Sections[${sectionIndex}].Description" class="table-input" rows="1" placeholder="Содержание..." style="width:100%; border:none; padding:8px; resize:vertical; min-height: 38px; color: var(--text-muted); font-size: 0.9em; background: white;"></textarea>
+                        </td>
+                        <td style="padding: 0;"><input type="number" name="WorkLoads[${parentIndex}].Sections[${sectionIndex}].LectureHours" class="table-input text-center" value="0" style="width:100%; border:none; padding:8px; background: white;" /></td>
+                        <td style="padding: 0;"><input type="number" name="WorkLoads[${parentIndex}].Sections[${sectionIndex}].LabHours" class="table-input text-center" value="0" style="width:100%; border:none; padding:8px; background: white;" /></td>
+                        <td style="padding: 0;"><input type="number" name="WorkLoads[${parentIndex}].Sections[${sectionIndex}].SeminarHours" class="table-input text-center" value="0" style="width:100%; border:none; padding:8px; background: white;" /></td>
+                        <td style="padding: 0;"><input type="number" name="WorkLoads[${parentIndex}].Sections[${sectionIndex}].SelfStudyHours" class="table-input text-center" value="0" style="width:100%; border:none; padding:8px; background: white;" /></td>
+                        <td class="text-center" style="padding: 0;">
+                            <button type="button" class="btn" style="color: #95a5a6; background: transparent; border: none; cursor: pointer; padding: 8px;" onclick="this.closest('tr').remove()" title="Удалить строку">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </td>
+                    `;
             tbody.appendChild(row);
         }
 
         function removeSemester(btn) {
-            if(confirm('Удалить этот семестр?')) {
+            if (confirm('Удалить этот семестр?')) {
                 btn.closest('.semester-card').remove();
-                // При необходимости можно добавить логику переиндексации
+
             }
         }
 
         $(document).ready(function () {
-            // --- Логика Скрытия/Показа блока преподавателей ---
+
             $('#disciplineSelect').change(function () {
                 var disciplineId = $(this).val();
-                
+
                 $('#teachersList').empty();
-                
+
                 if (disciplineId) {
-                    $('#teachersTable').slideDown(50); 
+                    $('#teachersTable').slideDown(50);
 
                     $.ajax({
                         url: '@Url.Action("GetDisciplineTeachers", "AcademicProgram")',
@@ -330,12 +350,12 @@
                         data: { disciplineId: disciplineId },
                         success: function (data) {
                             if (data.assignedTeachers && data.assignedTeachers.length > 0) {
-                                data.assignedTeachers.forEach(function(dt) {
-                                    const row = createTeacherRow(dt.id, dt.participationType, dt.name); 
+                                data.assignedTeachers.forEach(function (dt) {
+                                    const row = createTeacherRow(dt.id, dt.participationType, dt.name);
                                     $('#teachersList').append(row);
                                 });
                             } else {
-                                $('#teachersTable').slideUp(200); 
+                                $('#teachersTable').slideUp(200);
                             }
                         },
                         error: function () {
@@ -344,12 +364,12 @@
                         }
                     });
                 } else {
-                    $('#teachersTable').slideUp(200); 
+                    $('#teachersTable').slideUp(200);
                     $('#teacherHelp').html(`<i class="fas fa-info-circle"></i> Выберите дисциплину выше, чтобы загрузить список.`);
                 }
             });
 
-            // AJAX для специальности (загрузка деталей) - ОБНОВЛЕНО ДЛЯ DIV
+
             $('#specialtySelect').change(function () {
                 var specialtyId = $(this).val();
                 if (specialtyId) {
@@ -358,7 +378,7 @@
                         type: 'GET',
                         data: { specialtyId: specialtyId },
                         success: function (data) {
-                            // ИСПОЛЬЗУЕМ .text() ДЛЯ DIV ЭЛЕМЕНТОВ
+
                             $('#directionField').text(data.direction);
                             $('#durationField').text(data.duration);
                             $('#competenciesField').text(data.competencies);
@@ -375,8 +395,8 @@
                     $('#competenciesField').text('—');
                 }
             });
-            
-            // Инициализация при загрузке страницы
+
+
             if ($('#specialtySelect').val()) $('#specialtySelect').trigger('change');
             if ($('#disciplineSelect').val()) $('#disciplineSelect').trigger('change');
         });

@@ -5,9 +5,8 @@ namespace MyWebApp.Models
         public int Id { get; set; }
         public int TeacherId { get; set; }
         public int DisciplineId { get; set; }
-        public string? ParticipationType { get; set; } // nullable
+        public string? ParticipationType { get; set; }
 
-        // Navigation
         public virtual User Teacher { get; set; } = null!;
         public virtual Discipline Discipline { get; set; } = null!;
     }

@@ -2,12 +2,14 @@
 
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Учебная система</title>
     <link rel="stylesheet" href="~/css/layout.css" asp-append-version="true" />
 </head>
+
 <body>
     <header class="navbar">
         <div class="container navbar-bar">
@@ -18,10 +20,9 @@
             <div class="navbar-user">
                 @if (User?.Identity?.IsAuthenticated == true)
                 {
-                    // Получаем ФИО и роль безопасно
                     var fullName = User.FindFirst("FullName")?.Value
-                                         ?? User.Identity?.Name
-                                         ?? "Пользователь";
+                    ?? User.Identity?.Name
+                    ?? "Пользователь";
                     var role = User.FindFirst(ClaimTypes.Role)?.Value ?? "";
 
                     <div class="user-info">
@@ -51,9 +52,10 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-    
-    @* 🔑 КЛЮЧЕВАЯ СТРОКА: Рендеринг секции "Scripts" 🔑 *@
-    @RenderSection("Scripts", required: false) 
+
+
+    @RenderSection("Scripts", required: false)
 
 </body>
+
 </html>

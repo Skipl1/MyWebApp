@@ -2,24 +2,24 @@
 
 @{
     ViewData["Title"] = "Учебные программы";
-    var isAdmin = (bool?)ViewBag.IsAdmin ?? false; 
+    var isAdmin = (bool?)ViewBag.IsAdmin ?? false;
 }
 
 <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-@* Добавляем Font Awesome, чтобы использовать иконки *@
+
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
 
-@* === ВСПОМОГАТЕЛЬНЫЙ МЕТОД ДЛЯ ПЕРЕВОДА СТАТУСОВ === *@
+
 @{
     string GetStatusText(string status)
     {
         return status?.ToLower() switch
         {
             "approved" => "Принято",
-            "rejected" => "Отклонено",     
+            "rejected" => "Отклонено",
             "draft" => "Не проверена",
             "recheck" => "Перепроверить",
-            _ => status 
+            _ => status
         };
     }
 
@@ -28,7 +28,7 @@
         return status?.ToLower() switch
         {
             "approved" => "status-green",
-            "rejected" => "status-red",     
+            "rejected" => "status-red",
             "recheck" => "status-orange",
             "draft" => "status-gray",
             _ => "status-gray"
@@ -37,14 +37,14 @@
 }
 
 <div class="container program-container">
-    
+
     <a href="/" class="back-button">
         <span class="back-icon">←</span> На главную
     </a>
 
     <h2 class="program-page-title"> Учебные программы (@Model.Count())</h2>
 
-    @* === БЛОК ДОБАВЛЕНИЯ ПРОГРАММЫ (ТОЛЬКО ДЛЯ АДМИНА) === *@
+
     @if (isAdmin)
     {
         <div class="admin-actions-bar">
@@ -60,40 +60,40 @@
         {
             @foreach (var item in Model)
             {
-                // Вся карточка - это ссылка на Details
+
                 <a asp-action="Details" asp-route-id="@item.Id" class="program-card">
-                    
-                    @* === БЛОК 1: ДИСЦИПЛИНА И ГОД === *@
+
+
                     <div class="program-discipline-header">
                         <h3 class="program-discipline-name">@item.Discipline?.Name</h3>
                         <span class="program-year-badge">@item.StartYear</span>
                     </div>
 
-                    @* === БЛОК 2: ИНФОРМАЦИЯ === *@
+
                     <div class="program-body">
                         <p class="program-specialty-info">
-                            <span class="label">Специальность:</span> 
+                            <span class="label">Специальность:</span>
                             <span class="value specialty-name">@item.Specialty?.Name</span>
                         </p>
                         <p class="program-specialty-info">
-                            <span class="label">Направление:</span> 
+                            <span class="label">Направление:</span>
                             <span class="value">@item.Specialty?.Direction</span>
                         </p>
                         <p class="program-name-value">Программа: @item.Name</p>
                     </div>
-                    
-                    @* === БЛОК 3: ПОДВАЛ С КАРТОЧКОЙ СТАТУСА === *@
+
+
                     <div class="program-footer">
                         <div class="footer-item">
-                            @* ⏳ заменено на иконку часов *@
+
                             <span class="icon"><i class="far fa-clock"></i></span> @item.Specialty?.Duration лет
                         </div>
                         <div class="footer-item">
-                            @* 🎓 заменено на иконку шапочки *@
+
                             <span class="icon"><i class="fas fa-graduation-cap"></i></span> @item.Specialty?.Qualification
                         </div>
                         <div class="footer-item">
-                            @* Вывод статуса с учетом стилей *@
+
                             <span class="status-indicator @GetStatusClass(item.Status)">
                                 @GetStatusText(item.Status)
                             </span>
