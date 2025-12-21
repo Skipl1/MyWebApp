@@ -510,15 +510,14 @@ namespace MyWebApp.Controllers
             {
                 "approved" => "Утверждена",
                 "rejected" => "Отклонена",
-                "recheck" => "На доработку",
-                "draft" => "Черновик",
+                "recheck" => "Перепроверить",
+                "draft" => "Не проверена",
                 _ => "Неизвестный статус"
             };
         }
 
         public async Task<IActionResult> Download(int id)
         {
-
             var program = await _context.AcademicPrograms
                 .Include(ap => ap.Specialty)
                 .Include(ap => ap.Discipline)
@@ -531,22 +530,13 @@ namespace MyWebApp.Controllers
             if (program == null) return NotFound();
 
             using var ms = new MemoryStream();
-
-
             Document doc = new Document(PageSize.A4, 30, 30, 30, 30);
             PdfWriter writer = PdfWriter.GetInstance(doc, ms);
-
             doc.Open();
 
-
             string fontPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Fonts), "arial.ttf");
-            if (!System.IO.File.Exists(fontPath))
-            {
-                fontPath = @"C:\Windows\Fonts\arial.ttf";
-            }
-
+            if (!System.IO.File.Exists(fontPath)) fontPath = @"C:\Windows\Fonts\arial.ttf";
             BaseFont baseFont = BaseFont.CreateFont(fontPath, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
-
 
             Font fontTitle = new Font(baseFont, 16, Font.BOLD);
             Font fontSectionHeader = new Font(baseFont, 14, Font.BOLD);
@@ -554,63 +544,43 @@ namespace MyWebApp.Controllers
             Font fontNormal = new Font(baseFont, 10, Font.NORMAL);
             Font fontSmall = new Font(baseFont, 9, Font.NORMAL);
 
-
             var titleParagraph = new Paragraph($"Учебная программа: {program.Name}", fontTitle);
             titleParagraph.Alignment = Element.ALIGN_CENTER;
             titleParagraph.SpacingAfter = 20f;
             doc.Add(titleParagraph);
-
 
             PdfPTable mainInfoTable = new PdfPTable(4);
             mainInfoTable.WidthPercentage = 100;
             mainInfoTable.SetWidths(new float[] { 20, 30, 20, 30 });
             mainInfoTable.SpacingAfter = 20f;
 
-
             AddSimpleCell(mainInfoTable, "Название программы", fontBold, 1);
             AddSimpleCell(mainInfoTable, program.Name, fontNormal, 1);
             AddSimpleCell(mainInfoTable, "Направление", fontBold, 1);
             AddSimpleCell(mainInfoTable, program.Specialty?.Direction, fontNormal, 1);
-
-
             AddSimpleCell(mainInfoTable, "Дисциплина", fontBold, 1);
             AddSimpleCell(mainInfoTable, program.Discipline?.Name, fontNormal, 1);
             AddSimpleCell(mainInfoTable, "Срок обучения", fontBold, 1);
-
             AddSimpleCell(mainInfoTable, program.Specialty?.Duration.ToString(), fontNormal, 1);
-
-
             AddSimpleCell(mainInfoTable, "Специальность", fontBold, 1);
             AddSimpleCell(mainInfoTable, program.Specialty?.Name, fontNormal, 1);
             AddSimpleCell(mainInfoTable, "Квалификация", fontBold, 1);
             AddSimpleCell(mainInfoTable, program.Specialty?.Qualification, fontNormal, 1);
-
-
-
             AddSimpleCell(mainInfoTable, "Год начала", fontBold, 1);
             AddSimpleCell(mainInfoTable, program.StartYear.ToString(), fontNormal, 1);
-
             AddSimpleCell(mainInfoTable, "Статус", fontBold, 1);
-            string russianStatus = GetStatusDisplayName(program.Status);
-            AddSimpleCell(mainInfoTable, russianStatus, fontNormal, 1);
-
+            AddSimpleCell(mainInfoTable, GetStatusDisplayName(program.Status), fontNormal, 1);
             AddSimpleCell(mainInfoTable, "", fontNormal, 2);
-
             doc.Add(mainInfoTable);
 
             doc.Add(new Paragraph("Преподавательский состав", fontSectionHeader) { SpacingBefore = 10f, SpacingAfter = 10f });
-
             if (program.Discipline?.DisciplineTeachers != null && program.Discipline.DisciplineTeachers.Any())
             {
                 PdfPTable teachersTable = new PdfPTable(2);
                 teachersTable.WidthPercentage = 100;
                 teachersTable.SetWidths(new float[] { 70, 30 });
-                teachersTable.DefaultCell.BorderColor = BaseColor.BLACK;
-
-
                 AddSimpleHeaderCell(teachersTable, "Преподаватель", fontBold);
                 AddSimpleHeaderCell(teachersTable, "Тип участия", fontBold);
-
                 foreach (var dt in program.Discipline.DisciplineTeachers)
                 {
                     teachersTable.AddCell(new Phrase($"{dt.Teacher.Surname} {dt.Teacher.Name} {dt.Teacher.Patronymic}", fontNormal));
@@ -623,46 +593,38 @@ namespace MyWebApp.Controllers
                 doc.Add(new Paragraph("Преподаватели не назначены.", fontNormal));
             }
 
-
             doc.Add(new Paragraph("Учебный план по семестрам", fontSectionHeader) { SpacingBefore = 20f, SpacingAfter = 10f });
-
             if (program.WorkLoads != null && program.WorkLoads.Any())
             {
                 foreach (var wl in program.WorkLoads.OrderBy(w => w.Semester))
                 {
-
                     doc.Add(new Paragraph($"СЕМЕСТР {wl.Semester}", fontBold) { SpacingBefore = 10f, SpacingAfter = 5f });
-
-
                     PdfPTable statsTable = new PdfPTable(5);
                     statsTable.WidthPercentage = 100;
-                    statsTable.DefaultCell.BorderColor = BaseColor.BLACK;
-
                     AddSimpleHeaderCell(statsTable, "Лекции", fontBold);
                     AddSimpleHeaderCell(statsTable, "Лаб.", fontBold);
                     AddSimpleHeaderCell(statsTable, "Практ. (СРС)", fontBold);
                     AddSimpleHeaderCell(statsTable, "Аттестация", fontBold);
-                    AddSimpleHeaderCell(statsTable, "Общая СРС", fontBold);
+                    AddSimpleHeaderCell(statsTable, "Тип аттест.", fontBold);
 
                     statsTable.AddCell(new Phrase(wl.Lectures.ToString(), fontNormal));
                     statsTable.AddCell(new Phrase(wl.Labs.ToString(), fontNormal));
                     statsTable.AddCell(new Phrase(wl.SelfStudy.ToString(), fontNormal));
-                    statsTable.AddCell(new Phrase(wl.IntermediateAssessment.ToString(), fontNormal));
-                    statsTable.AddCell(new Phrase(wl.AssessmentType, fontNormal));
+
+                    string assessmentHours = wl.IntermediateAssessment > 0 ? wl.IntermediateAssessment.ToString() : "нет данных";
+                    statsTable.AddCell(new Phrase(assessmentHours, fontNormal));
+
+                    string assessmentType = !string.IsNullOrWhiteSpace(wl.AssessmentType) ? wl.AssessmentType : "не указан";
+                    statsTable.AddCell(new Phrase(assessmentType, fontNormal));
 
                     doc.Add(statsTable);
 
-
                     doc.Add(new Paragraph("Разделы дисциплины:", fontBold) { SpacingBefore = 10f });
-
                     if (wl.Sections != null && wl.Sections.Any())
                     {
                         PdfPTable secTable = new PdfPTable(7);
                         secTable.WidthPercentage = 100;
                         secTable.SetWidths(new float[] { 5, 20, 30, 10, 10, 10, 15 });
-                        secTable.SpacingBefore = 5f;
-                        secTable.DefaultCell.BorderColor = BaseColor.BLACK;
-
                         AddSimpleHeaderCell(secTable, "#", fontBold);
                         AddSimpleHeaderCell(secTable, "Название раздела", fontBold);
                         AddSimpleHeaderCell(secTable, "Краткое содержание", fontBold);
@@ -670,7 +632,6 @@ namespace MyWebApp.Controllers
                         AddSimpleHeaderCell(secTable, "Лаб.", fontBold);
                         AddSimpleHeaderCell(secTable, "Сем.", fontBold);
                         AddSimpleHeaderCell(secTable, "СРС", fontBold);
-
                         foreach (var s in wl.Sections.OrderBy(sec => sec.Index))
                         {
                             secTable.AddCell(new Phrase(s.Index.ToString(), fontSmall));
@@ -689,9 +650,12 @@ namespace MyWebApp.Controllers
                     }
                 }
             }
+            else
+            {
+                doc.Add(new Paragraph("Нет данных об учебном плане.", fontNormal));
+            }
 
             doc.Add(new Paragraph("Методические материалы", fontSectionHeader) { SpacingBefore = 20f, SpacingAfter = 15f });
-
             AddSimpleTextBlock(doc, "Цели и задачи", program.Goals, fontBold, fontNormal);
             AddSimpleTextBlock(doc, "Компетенции", program.Competencies, fontBold, fontNormal);
             AddSimpleTextBlock(doc, "Требования", program.Requirements, fontBold, fontNormal);
@@ -699,9 +663,16 @@ namespace MyWebApp.Controllers
             AddSimpleTextBlock(doc, "Литература", program.Literature, fontBold, fontNormal);
 
             doc.Close();
+            return File(ms.ToArray(), "application/pdf", $"Program_{program.Id}.pdf");
+        }
 
-            string fileName = $"Program_{program.Id}.pdf";
-            return File(ms.ToArray(), "application/pdf", fileName);
+        private void AddSimpleTextBlock(Document doc, string title, string content, Font fontTitle, Font fontBody)
+        {
+            doc.Add(new Paragraph(title, fontTitle) { SpacingBefore = 10f });
+            string textToShow = string.IsNullOrWhiteSpace(content) ? "Нет данных" : content;
+            var p = new Paragraph(textToShow, fontBody);
+            p.SpacingAfter = 10f;
+            doc.Add(p);
         }
 
         private void AddSimpleCell(PdfPTable table, string content, Font font, int colspan = 1)
@@ -722,18 +693,6 @@ namespace MyWebApp.Controllers
             cell.Padding = 5f;
             cell.BorderColor = BaseColor.BLACK;
             table.AddCell(cell);
-        }
-
-        private void AddSimpleTextBlock(Document doc, string title, string content, Font fontTitle, Font fontBody)
-        {
-            if (!string.IsNullOrWhiteSpace(content))
-            {
-                doc.Add(new Paragraph(title, fontTitle) { SpacingBefore = 10f });
-
-                var p = new Paragraph(content, fontBody);
-                p.SpacingAfter = 10f;
-                doc.Add(p);
-            }
         }
     }
 }

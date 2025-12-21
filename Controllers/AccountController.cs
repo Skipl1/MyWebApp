@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using MyWebApp.Data;
-
 namespace MyWebApp.Controllers
 {
     public class AccountController : Controller
@@ -14,7 +13,6 @@ namespace MyWebApp.Controllers
         {
             _context = context;
         }
-
         [HttpGet]
         public IActionResult Login()
         {
@@ -25,7 +23,6 @@ namespace MyWebApp.Controllers
             }
             return View();
         }
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(string login, string password)
@@ -36,9 +33,6 @@ namespace MyWebApp.Controllers
                 TempData["ErrorMessage"] = "Логин и пароль обязательны.";
                 return View();
             }
-
-
-
             var user = _context.Users.FirstOrDefault(u => u.Login == login && u.Password == password);
 
             if (user != null)
@@ -52,29 +46,20 @@ namespace MyWebApp.Controllers
 
                     new Claim("FullName", $"{user.Surname} {user.Name} {user.Patronymic ?? ""}".Trim())
                 };
-
                 var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                 var authProperties = new AuthenticationProperties();
-
-
                 await HttpContext.SignInAsync(
                     CookieAuthenticationDefaults.AuthenticationScheme,
                     new ClaimsPrincipal(claimsIdentity),
                     authProperties);
-
-
                 return RedirectToAction("Index", "Home");
             }
             else
             {
-
                 TempData["ErrorMessage"] = "Неверный логин или пароль.";
             }
-
-
             return View();
         }
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()

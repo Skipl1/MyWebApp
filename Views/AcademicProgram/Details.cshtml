@@ -47,7 +47,8 @@
 
                 @if (isAdmin)
                 {
-                    <form asp-action="Delete" asp-route-id="@Model.Id" method="post">
+                    <form asp-action="Delete" asp-route-id="@Model.Id" method="post"
+                        onsubmit="return confirm('Вы уверены, что хотите полностью удалить эту учебную программу? Это действие нельзя будет отменить.');">
                         <button type="submit" class="btn"
                             style="background-color: var(--warning-color); color: var(--text-main); height: 45px;">
                             Удалить программу

@@ -174,7 +174,7 @@ public class CurriculumController : Controller
             document.Add(new Paragraph($"Специальность: {specialty.Name}", fontText));
             document.Add(new Paragraph($"Направление: {specialty.Direction}", fontText));
             document.Add(new Paragraph($"Продолжительность обучения: {specialty.Duration} лет", fontText));
-            document.Add(new Paragraph($"Год утверждения: {DateTime.Now.Year}", fontText));
+            document.Add(new Paragraph($"Квалификация: {specialty.Qualification}", fontText));
             document.Add(new Paragraph("\n"));
 
 

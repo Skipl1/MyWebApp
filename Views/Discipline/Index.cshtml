@@ -2,8 +2,6 @@
 
 @{
     ViewData["Title"] = "Список дисциплин";
-
-
     var isAdmin = (bool)ViewBag.IsAdmin;
     var newDiscipline = (MyWebApp.Models.Discipline)ViewBag.NewDiscipline;
     var totalCount = Model.Count();
@@ -13,47 +11,49 @@
 <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
 
+<div id="validationToast">
+    <i class="fas fa-exclamation-circle" style="margin-right: 10px; color: #ff4757;"></i>
+    Пожалуйста, введите название дисциплины!
+</div>
+
 <div class="container program-container">
-
-
     <div style="margin-bottom: 20px;">
         <a href="/" class="back-button" style="text-decoration: none; color: var(--accent-dark); font-weight: 500;">
             <span class="back-icon" style="margin-right: 5px;">←</span> На главную
         </a>
     </div>
 
-
     <div style="text-align: center; margin-bottom: 30px;">
         <h2 style="color: var(--text-main); font-size: 1.8rem; margin-bottom: 5px;">Список дисциплин</h2>
         <div class="text-muted" style="font-size: 0.9em;">Всего дисциплин: @totalCount</div>
     </div>
 
-
     @if (isAdmin)
     {
         <div class="card-style"
             style="background-color: var(--bg-element); padding: 25px; border-radius: var(--radius); border: 1px solid #ccc; margin-bottom: 40px;">
-            <h5 style="color: var(--accent-dark); margin-bottom: 15px;"><i class="fas fa-plus-circle"></i> Добавить новую
-                дисциплину</h5>
+            <h5 style="color: var(--accent-dark); margin-bottom: 15px;">
+                <i class="fas fa-plus-circle"></i> Добавить новую дисциплину
+            </h5>
 
-            <form asp-action="Index" method="post">
+            <form asp-action="Index" method="post" id="disciplineForm" novalidate>
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
                 <div style="display: flex; gap: 15px; align-items: flex-start;">
                     <div style="flex-grow: 1;">
                         <input type="text" asp-for="@newDiscipline.Name" class="form-control-custom"
-                            placeholder="Введите название дисциплины..." style="background: white;" />
-                        <span class="text-danger small" style="display:block; margin-top: 5px;">@Html.ValidationMessageFor(m
-                                                    => newDiscipline.Name)</span>
-                </div>
-                <button type="submit" class="btn btn-primary" style="padding: 10px 25px; height: 42px;">
-                    Добавить
-                </button>
-            </div>
-        </form>
-    </div>
-        }
+                            placeholder="Введите название дисциплины..." style="background: white;" required />
 
+                        <span asp-validation-for="@newDiscipline.Name" class="text-danger small"
+                            style="display:block; margin-top: 5px;"></span>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="padding: 10px 25px; height: 42px;">
+                        Добавить
+                    </button>
+                </div>
+            </form>
+        </div>
+    }
 
     <div class="discipline-list-container">
         @if (Model.Any())
@@ -61,13 +61,12 @@
             <div style="display: grid; gap: 15px;">
                 @foreach (var discipline in Model)
                 {
-
                     if (isAdmin && discipline.Id == editId)
                     {
-
                         <div class="card-style"
                             style="border: 2px solid var(--primary-color); padding: 20px; border-radius: var(--radius); background-color: #fff;">
                             <form asp-action="EditConfirmed" asp-route-id="@discipline.Id" method="post"
+                                id="editForm-@discipline.Id"
                                 style="display: flex; align-items: center; justify-content: space-between; gap: 20px;">
 
                                 <input type="hidden" asp-for="@discipline.Id" name="Id" />
@@ -79,8 +78,8 @@
                                     </div>
                                     <div style="flex-grow: 1;">
                                         <input type="text" asp-for="@discipline.Name" name="Name" class="form-control-custom"
-                                            style="width: 100%;" />
-                                        <span class="text-danger small">@Html.ValidationMessageFor(m => discipline.Name)</span>
+                                            style="width: 100%;" required />
+                                        <span asp-validation-for="@discipline.Name" class="text-danger small"></span>
                                     </div>
                                 </div>
 
@@ -98,11 +97,9 @@
                     }
                     else
                     {
-
                         <div class="card-style discipline-card"
                             style="border: 1px solid #eee; padding: 20px; border-radius: var(--radius); background-color: white; transition: box-shadow 0.2s;">
                             <div style="display: flex; align-items: center; justify-content: space-between;">
-
                                 <div style="display: flex; align-items: center; gap: 15px;">
                                     <div
                                         style="width: 40px; height: 40px; background-color: #f8f9fa; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--accent-dark);">
@@ -137,3 +134,30 @@
         }
     </div>
 </div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.min.js"></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
+
+    <script>
+        function showToast() {
+            const toast = document.getElementById("validationToast");
+            toast.className = "show";
+            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 4000);
+        }
+
+        $(document).ready(function () {
+
+            $('form').on('submit', function (e) {
+                const form = $(this);
+                if (!form.valid()) {
+                    e.preventDefault();
+                    showToast();
+                    return false;
+                }
+            });
+        });
+    </script>
+}

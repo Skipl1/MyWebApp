@@ -751,3 +751,40 @@ a.card-style:hover,
   border-color: var(--accent-dark) !important;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
+
+.input-validation-error {
+  border: 2px solid #dc3545 !important;
+  background-color: #fff8f8 !important;
+}
+
+.field-validation-error {
+  color: #dc3545;
+  font-size: 0.85rem;
+  margin-top: 4px;
+  display: block;
+}
+
+#validationToast {
+  visibility: hidden;
+  min-width: 300px;
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  border-radius: var(--radius);
+  padding: 16px;
+  position: fixed;
+  z-index: 1000;
+  left: 50%;
+  bottom: 30px;
+  transform: translateX(-50%);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  font-weight: 500;
+  opacity: 0;
+  transition: opacity 0.4s, bottom 0.4s, visibility 0.4s;
+}
+
+#validationToast.show {
+  visibility: visible;
+  opacity: 1;
+  bottom: 50px;
+}

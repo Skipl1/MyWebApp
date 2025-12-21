@@ -1,7 +1,6 @@
 @model MyWebApp.Models.AcademicProgram
 @using System.Text.Json;
 @using System.Text.Json.Serialization;
-
 @{
     ViewData["Title"] = $"Редактирование: {Model.Name}";
 
@@ -20,7 +19,6 @@
 
 <div class="container program-container">
 
-
     <div style="margin-bottom: 20px;">
         <a asp-action="Index" class="back-button"
             style="text-decoration: none; color: var(--accent-dark); font-weight: 500;">
@@ -37,12 +35,12 @@
             style="border: 1px solid #ccc; padding: 30px; border-radius: var(--radius); background-color: white;">
 
             <div style="text-align: center; margin-top: 15px; margin-bottom: 30px;">
-                <h2 style="color: var(--text-main); font-size: 1.8rem; margin-bottom: 15px;">Редактирование программы
+                <h2 style="color: var(--text-main); font-size: 1.8rem; margin-bottom: 15px;">
+                    Редактирование программы
                 </h2>
                 <div class="text-muted">@Model.Name</div>
                 <div asp-validation-summary="All" class="text-danger" style="margin-top: 10px;"></div>
             </div>
-
 
             <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px; padding-top: 10px;">
 
@@ -63,7 +61,8 @@
                         </div>
                         <div class="input-group-custom">
                             <label asp-for="StartYear" class="info-label">Год начала *</label>
-                            <input asp-for="StartYear" type="number" class="form-control-custom" />
+                            <input asp-for="StartYear" type="number" class="form-control-custom" min="0"
+                                oninput="if(this.value<0)this.value=0" />
                         </div>
                         <div class="input-group-custom" style="grid-column: span 2;">
                             <label asp-for="SpecialtyId" class="info-label">Специальность *</label>
@@ -74,7 +73,6 @@
                         </div>
                     </div>
                 </div>
-
 
                 <div
                     style="background-color: var(--bg-element); padding: 20px; border-radius: var(--radius); border: 1px solid #ccc; height: fit-content;">
@@ -98,7 +96,6 @@
 
             <hr style="border-top: 1px solid #ccc; margin: 30px 0;" />
 
-
             <h5 style="color: var(--text-main); margin-bottom: 20px;">Преподавательский состав</h5>
             <div id="teachersSection">
                 <div id="teacherHelp" class="text-muted small mb-3">
@@ -117,12 +114,9 @@
 
             <hr style="border-top: 1px solid #ccc; margin: 40px 0;" />
 
-
             <h4 style="color: var(--accent-dark); margin-bottom: 30px;">Учебный план по семестрам</h4>
 
-            <div id="semestersContainer">
-
-            </div>
+            <div id="semestersContainer"></div>
 
             <div style="text-align: center; margin-top: 20px;">
                 <button type="button" class="btn"
@@ -133,7 +127,6 @@
             </div>
 
             <hr style="border-top: 1px solid #ccc; margin: 40px 0;" />
-
 
             <h4 style="color: var(--accent-dark); margin-bottom: 30px;">Методические материалы</h4>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 40px;">
@@ -191,114 +184,113 @@
 
     <script>
         const modelData = @Html.Raw(modelJson);
-        let semesterIndex = 0;
 
+        let semesterIndex = 0;
 
         function createTeacherRow(teacherId = null, participationType = null, teacherName = null) {
             const displayTeacherName = teacherName || `ID: ${teacherId}`;
             const pType = participationType || '—';
             return `
-                            <tr>
-                                <td style="padding: 10px; border: 1px solid #eee;">
-                                    <input type="hidden" name="TeacherId" value="${teacherId}" />
-                                    <span class="font-weight-bold" style="color: #333;">${displayTeacherName}</span>
-                                </td>
-                                <td style="padding: 10px; border: 1px solid #eee;">
-                                    <input type="hidden" name="ParticipationType" value="${participationType}" />
-                                    <span style="background: #eee; padding: 4px 8px; border-radius: 4px; font-size: 0.9em;">${pType}</span>
-                                </td>
-                            </tr>
-                        `;
+                                                        <tr>
+                                                            <td style="padding: 10px; border: 1px solid #eee;">
+                                                                <input type="hidden" name="TeacherId" value="${teacherId}" />
+                                                                <span class="font-weight-bold" style="color: #333;">${displayTeacherName}</span>
+                                                            </td>
+                                                            <td style="padding: 10px; border: 1px solid #eee;">
+                                                                <input type="hidden" name="ParticipationType" value="${participationType}" />
+                                                                <span style="background: #eee; padding: 4px 8px; border-radius: 4px; font-size: 0.9em;">${pType}</span>
+                                                            </td>
+                                                        </tr>
+                                                    `;
         }
-
 
         function renderSemesterBlock(data = null) {
             const container = document.getElementById('semestersContainer');
             const idx = semesterIndex;
 
             const sVal = data ? data.semester : (idx + 1);
-            const lec = data ? data.lectures : "";
-            const lab = data ? data.labs : "";
-            const sem = data ? data.seminars : "";
-            const self = data ? data.selfStudy : "";
+            const lec = data ? data.lectures : 0;
+            const lab = data ? data.labs : 0;
+            const sem = data ? data.selfStudy : 0;
+            const self = data ? data.intermediateAssessment : 0;
             const assess = data ? data.assessmentType : "";
 
             const block = document.createElement('div');
-
             block.className = "semester-card card-style";
             block.setAttribute('data-index', idx);
             block.style.cssText = "margin-bottom: 30px; padding: 20px; border: 1px solid rgb(221, 221, 221); background-color: var(--bg-element);";
 
-
             const tableInputStyle = "width:100%; border:none; padding:8px; background: white;";
 
             block.innerHTML = `
-                            <div class="semester-header-custom" style="display: flex; justify-content: space-between; border-bottom: 2px solid var(--accent-color); padding-bottom: 10px; margin-bottom: 20px;">
-                                <div style="display: flex; align-items: center; gap: 10px;">
-                                    <h5 style="color: var(--accent-dark); font-weight: 700; margin: 0;">Семестр</h5>
-                                    <input type="number" name="WorkLoads[${idx}].Semester" class="form-control-custom" style="width: 70px; padding: 5px; text-align:center;" required="" min="1" value="${sVal}">
-                                </div>
-                                <button type="button" class="btn" style="color: #95a5a6; border: 1px solid #bdc3c7; padding: 5px 10px; border-radius: 4px; background: transparent; cursor: pointer;" onclick="removeSemester(this)">
-                                    <i class="fas fa-trash-alt"></i> Удалить
-                                </button>
-                            </div>
-                
-                            <div style="margin-bottom: 25px;">
-                                 <table class="table-soft-bordered workload-table" style="text-align: center;">
-                                    <thead>
-                                        <tr>
-                                            <th>Лекции</th>
-                                            <th>Лаб.</th>
-                                            <th>Практ.</th>
-                                            <th>СРС</th>
-                                            <th>Аттестация</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td style="padding: 0;"><input type="number" name="WorkLoads[${idx}].Lectures" class="table-input text-center" style="${tableInputStyle}" placeholder="0" value="${lec}"></td>
-                                            <td style="padding: 0;"><input type="number" name="WorkLoads[${idx}].Labs" class="table-input text-center" style="${tableInputStyle}" placeholder="0" value="${lab}"></td>
-                                            <td style="padding: 0;"><input type="number" name="WorkLoads[${idx}].Seminars" class="table-input text-center" style="${tableInputStyle}" placeholder="0" value="${sem}"></td>
-                                            <td style="padding: 0;"><input type="number" name="WorkLoads[${idx}].SelfStudy" class="table-input text-center" style="${tableInputStyle}" placeholder="0" value="${self}"></td>
-                                            <td style="padding: 0;">
-                                                <select name="WorkLoads[${idx}].AssessmentType" class="table-input" style="width:100%; border:none; padding:8px; text-align: center; color: var(--accent-dark); font-weight:500; background: white;">
-                                                    <option value="">--</option>
-                                                    <option value="Экзамен" ${assess === 'Экзамен' ? 'selected' : ''}>Экзамен</option>
-                                                    <option value="Зачет" ${assess === 'Зачет' ? 'selected' : ''}>Зачет</option>
-                                                    <option value="Курсовая" ${assess === 'Курсовая' ? 'selected' : ''}>Курсовая</option>
-                                                </select>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
+                                        <div class="semester-header-custom" style="display: flex; justify-content: space-between; border-bottom: 2px solid var(--accent-color); padding-bottom: 10px; margin-bottom: 20px;">
+                                            <div style="display: flex; align-items: center; gap: 10px;">
+                                                <h5 style="color: var(--accent-dark); font-weight: 700; margin: 0;">Семестр</h5>
+                                                <input type="number" name="WorkLoads[${idx}].Semester" class="form-control-custom" style="width: 70px; padding: 5px; text-align:center;" required="" min="1" oninput="if(this.value<1)this.value=1" value="${sVal}">
+                                            </div>
+                                            <button type="button" class="btn" style="color: #95a5a6; border: 1px solid #bdc3c7; padding: 5px 10px; border-radius: 4px; background: transparent; cursor: pointer;" onclick="removeSemester(this)">
+                                                <i class="fas fa-trash-alt"></i> Удалить
+                                            </button>
+                                        </div>
 
-                            <div>
-                                <h6 style="color: var(--text-muted); margin-bottom: 10px;">Разделы дисциплины:</h6>
-                                <table class="table-soft-bordered">
-                                    <thead>
-                                        <tr>
-                                            <th style="width: 50px;">#</th>
-                                            <th style="text-align: left;">Название раздела</th>
-                                            <th style="text-align: left;">Краткое содержание</th>
-                                            <th style="width: 50px;">Лек.</th>
-                                            <th style="width: 50px;">Лаб.</th>
-                                            <th style="width: 50px;">Сем.</th>
-                                            <th style="width: 50px;">СРС</th>
-                                            <th style="width: 40px;"></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="sections-body">
-                                        </tbody>
-                                </table>
-                                <button type="button" class="btn" style="margin-top: 10px; font-size: 0.9em; color: var(--accent-dark); border: 1px dashed var(--accent-dark); background: transparent; padding: 5px 10px; border-radius: 4px; cursor: pointer;" onclick="addEmptySectionRow(${idx}, this)">
-                                    <i class="fas fa-plus"></i> Добавить раздел
-                                </button>
-                            </div>
-                        `;
+                                        <div style="margin-bottom: 25px;">
+                                                <table class="table-soft-bordered workload-table" style="text-align: center;">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Лекции</th>
+                                                        <th>Лаб.</th>
+                                                        <th>Практ.</th>
+                                                        <th>СРС</th>
+                                                        <th>Аттестация</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td style="padding: 0;"><input type="number" name="WorkLoads[${idx}].Lectures" class="table-input text-center" style="${tableInputStyle}" placeholder="0" min="0" value="${lec}"></td>
+    
+                                                        <td style="padding: 0;"><input type="number" name="WorkLoads[${idx}].Labs" class="table-input text-center" style="${tableInputStyle}" placeholder="0" min="0" value="${lab}"></td>
+                                    
+                                                        <td style="padding: 0;"><input type="number" name="WorkLoads[${idx}].SelfStudy" class="table-input text-center" style="${tableInputStyle}" placeholder="0" min="0" value="${sem}"></td>
+                                    
+                                                        <td style="padding: 0;"><input type="number" name="WorkLoads[${idx}].IntermediateAssessment" class="table-input text-center" style="${tableInputStyle}" placeholder="0" min="0" value="${self}"></td>
+                                                        <td style="padding: 0;">
+                                                            <select name="WorkLoads[${idx}].AssessmentType" class="table-input" style="width:100%; border:none; padding:8px; text-align: center; color: var(--accent-dark); font-weight:500; background: white;">
+                                                                <option value="">--</option>
+                                                                <option value="Экзамен" ${assess === 'Экзамен' ? 'selected' : ''}>Экзамен</option>
+                                                                <option value="Зачет" ${assess === 'Зачет' ? 'selected' : ''}>Зачет</option>
+                                                                <option value="Курсовая" ${assess === 'Курсовая' ? 'selected' : ''}>Курсовая</option>
+                                                            </select>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                                </table>
+                                        </div>
+
+                                        <div>
+                                            <h6 style="color: var(--text-muted); margin-bottom: 10px;">Разделы дисциплины:</h6>
+                                            <table class="table-soft-bordered">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 50px;">#</th>
+                                                        <th style="text-align: left;">Название раздела</th>
+                                                        <th style="text-align: left;">Краткое содержание</th>
+                                                        <th style="width: 50px;">Лек.</th>
+                                                        <th style="width: 50px;">Лаб.</th>
+                                                        <th style="width: 50px;">Сем.</th>
+                                                        <th style="width: 50px;">СРС</th>
+                                                        <th style="width: 40px;"></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody class="sections-body">
+                                                </tbody>
+                                            </table>
+                                            <button type="button" class="btn" style="margin-top: 10px; font-size: 0.9em; color: var(--accent-dark); border: 1px dashed var(--accent-dark); background: transparent; padding: 5px 10px; border-radius: 4px; cursor: pointer;" onclick="addEmptySectionRow(${idx}, this)">
+                                                <i class="fas fa-plus"></i> Добавить раздел
+                                            </button>
+                                        </div>
+                                    `;
 
             container.appendChild(block);
-
 
             if (data && data.sections && data.sections.length > 0) {
                 const tbody = block.querySelector('.sections-body');
@@ -309,7 +301,6 @@
 
             semesterIndex++;
         }
-
 
         function renderSectionRow(tbody, parentIndex, data = null) {
             const sectionIndex = tbody.children.length;
@@ -322,44 +313,41 @@
             const sH = data ? data.seminarHours : '';
             const ssH = data ? data.selfStudyHours : '';
 
-
             const cellInputStyle = "width: 100%; border: none; padding: 8px; background: transparent;";
             const centerStyle = "text-align: center;";
 
             row.innerHTML = `
-                            <td style="padding: 0;">
-                                <input type="text" name="WorkLoads[${parentIndex}].Sections[${sectionIndex}].Index" style="${cellInputStyle} background:#f9f9f9;" class="text-center" value="${sectionIndex + 1}" readonly />
-                            </td>
-                            <td style="padding: 0;">
-                                <input type="text" name="WorkLoads[${parentIndex}].Sections[${sectionIndex}].Name" style="${cellInputStyle}" placeholder="Название..." required value="${name}" />
-                            </td>
-                            <td style="padding: 0;">
-                                <textarea name="WorkLoads[${parentIndex}].Sections[${sectionIndex}].Description" style="${cellInputStyle} resize:vertical;" rows="1" placeholder="Краткое...">${desc}</textarea>
-                            </td>
-                            <td style="padding: 0;"><input type="number" name="WorkLoads[${parentIndex}].Sections[${sectionIndex}].LectureHours" style="${cellInputStyle} ${centerStyle}" value="${lH}" /></td>
-                            <td style="padding: 0;"><input type="number" name="WorkLoads[${parentIndex}].Sections[${sectionIndex}].LabHours" style="${cellInputStyle} ${centerStyle}" value="${laH}" /></td>
-                            <td style="padding: 0;"><input type="number" name="WorkLoads[${parentIndex}].Sections[${sectionIndex}].SeminarHours" style="${cellInputStyle} ${centerStyle}" value="${sH}" /></td>
-                            <td style="padding: 0;"><input type="number" name="WorkLoads[${parentIndex}].Sections[${sectionIndex}].SelfStudyHours" style="${cellInputStyle} ${centerStyle}" value="${ssH}" /></td>
-                            <td class="text-center" style="padding: 0;">
-                                <button type="button" class="btn" style="color: #95a5a6; background: transparent; border: none; cursor: pointer; padding: 8px;" onclick="this.closest('tr').remove()" title="Удалить строку">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
-                            </td>
-                        `;
+                                                <td style="padding: 0;">
+                                                    <input type="text" name="WorkLoads[${parentIndex}].Sections[${sectionIndex}].Index" style="${cellInputStyle} background:#f9f9f9;" class="text-center" value="${sectionIndex + 1}" readonly />
+                                                </td>
+                                                <td style="padding: 0;">
+                                                    <input type="text" name="WorkLoads[${parentIndex}].Sections[${sectionIndex}].Name" style="${cellInputStyle}" placeholder="Название..." required value="${name}" />
+                                                </td>
+                                                <td style="padding: 0;">
+                                                    <textarea name="WorkLoads[${parentIndex}].Sections[${sectionIndex}].Description" style="${cellInputStyle} resize:vertical;" rows="1" placeholder="Краткое...">${desc}</textarea>
+                                                </td>
+                                                <td style="padding: 0;"><input type="number" name="WorkLoads[${parentIndex}].Sections[${sectionIndex}].LectureHours" style="${cellInputStyle} ${centerStyle}" min="0" oninput="if(this.value<0)this.value=0" value="${lH}" /></td>
+                                                <td style="padding: 0;"><input type="number" name="WorkLoads[${parentIndex}].Sections[${sectionIndex}].LabHours" style="${cellInputStyle} ${centerStyle}" min="0" oninput="if(this.value<0)this.value=0" value="${laH}" /></td>
+                                                <td style="padding: 0;"><input type="number" name="WorkLoads[${parentIndex}].Sections[${sectionIndex}].SeminarHours" style="${cellInputStyle} ${centerStyle}" min="0" oninput="if(this.value<0)this.value=0" value="${sH}" /></td>
+                                                <td style="padding: 0;"><input type="number" name="WorkLoads[${parentIndex}].Sections[${sectionIndex}].SelfStudyHours" style="${cellInputStyle} ${centerStyle}" min="0" oninput="if(this.value<0)this.value=0" value="${ssH}" /></td>
+                                                <td class="text-center" style="padding: 0;">
+                                                    <button type="button" class="btn" style="color: #95a5a6; background: transparent; border: none; cursor: pointer; padding: 8px;" 
+                                                            onclick="if(confirm('Удалить этот раздел?')) { this.closest('tr').remove(); }" title="Удалить строку">
+                                                        <i class="fas fa-trash-alt"></i>
+                                                    </button>
+                                                </td>
+                                            `;
             tbody.appendChild(row);
         }
-
 
         function addEmptySectionRow(parentIndex, btn) {
             const tbody = btn.previousElementSibling.querySelector('.sections-body');
             renderSectionRow(tbody, parentIndex, null);
         }
 
-
         function addNewSemester() {
             renderSemesterBlock(null);
         }
-
 
         function removeSemester(btn) {
             if (confirm('Удалить этот семестр?')) {
@@ -367,17 +355,13 @@
             }
         }
 
-
         $(document).ready(function () {
-
-
             if (modelData.workLoads && modelData.workLoads.length > 0) {
                 modelData.workLoads.sort((a, b) => a.semester - b.semester);
                 modelData.workLoads.forEach(wl => {
                     renderSemesterBlock(wl);
                 });
             }
-
 
             $('#specialtySelect').change(function () {
                 var specialtyId = $(this).val();
@@ -404,12 +388,10 @@
 
             $('#disciplineSelect').change(function () {
                 var disciplineId = $(this).val();
-
                 $('#teachersList').empty();
 
                 if (disciplineId) {
                     $('#teachersTable').slideDown(50);
-
                     $.ajax({
                         url: '@Url.Action("GetDisciplineTeachers", "AcademicProgram")',
                         type: 'GET',

@@ -56,7 +56,9 @@
 
                                     @if (User.Identity.IsAuthenticated && isHead)
                                     {
-                                        <form method="post" asp-controller="Teachers" asp-action="RemoveDiscipline">
+                                        <form method="post" asp-controller="Teachers" asp-action="RemoveDiscipline"
+                                            onsubmit="return confirm('Вы уверены, что хотите удалить эту дисциплину у преподавателя?');">
+
                                             <input type="hidden" name="disciplineTeacherId" value="@dt.Id" />
                                             <input type="hidden" name="departmentId" value="@Model.Id" />
                                             <button type="submit" class="btn delete-btn">Удалить</button>

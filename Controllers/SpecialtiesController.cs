@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MyWebApp.Data;
-
+using System.Linq;
 
 public class SpecialtiesController : Controller
 {
@@ -12,12 +12,9 @@ public class SpecialtiesController : Controller
         _context = context;
     }
 
-
     public async Task<IActionResult> Index()
     {
-
-        var specialties = await _context.Specialties
-            .ToListAsync();
+        var specialties = await _context.Specialties.ToListAsync();
 
         var groupedByDirection = specialties
             .Where(s => !string.IsNullOrEmpty(s.Direction))
@@ -28,12 +25,12 @@ public class SpecialtiesController : Controller
                 Specialties = g.Select(s => new
                 {
                     Id = s.Id,
-                    SpecialtyName = s.Name
+                    SpecialtyName = s.Name,
+                    Qualification = s.Qualification
                 }).OrderBy(s => s.SpecialtyName).ToList()
             })
             .OrderBy(g => g.DirectionName)
             .ToList();
-
 
         return View(groupedByDirection);
     }
